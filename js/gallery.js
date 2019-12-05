@@ -73,10 +73,6 @@ const requestImages = (() => {
         response.n_total_matching_entries = matches.length;
         response.result = matches.slice(options.n_offset, options.n_offset + options.n_results);
 
-        for (let image of response.result) {
-            image.image_url = `..${image.image_url}`;
-        }
-
         return response;
     };
 })();
