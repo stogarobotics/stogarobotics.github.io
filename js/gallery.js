@@ -37,7 +37,7 @@ function query() {
 }
 
 // version used with backend on
-function requestImages(options) {
+/*function requestImages(options) {
     return new Promise(resolve => {
         const req = new XMLHttpRequest();
         req.addEventListener("load", () => {
@@ -46,9 +46,9 @@ function requestImages(options) {
         req.open("GET", `./api/images?${new URLSearchParams(options)}`);
         req.send();
     });
-}
+}*/
 // version used on static page
-/*const requestImages = (() => {
+const requestImages = (() => {
     let queryResult;
 
     return async options => {
@@ -79,7 +79,7 @@ function requestImages(options) {
 
         return response;
     };
-})();*/
+})();
 
 async function fetchAndDisplayImages(options) {
     // Query the API
