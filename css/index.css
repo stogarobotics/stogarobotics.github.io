@@ -1,0 +1,1275 @@
+/* Howdy again, source code viewer! Looks like you’re having quite the time snooping around. */
+
+/* preferably translucent colors would use #RRGGBBAA syntax, but Edge does not support it*/
+
+* {
+    box-sizing: border-box;
+}
+
+/* Contains the base values and constants */
+/* preferably the constants would go in a `:root {}` selector but then the constants aren’t reset correctly (in Chrome); see the top of the nav on the homepage */
+body {
+    margin: 0;
+
+    /* background should not be visible; use to detect holes/unfinished places in layout */
+    background: #3a1010;
+
+    font-family: var(--font-fam-overpass);
+    font-weight: 600;
+    /* minimum width of the page content, below which the <main> element will stop shrinking if the window is too small */
+    --page-min-width: 550px;
+
+    /* fonts */
+    --font-fam-overpass: Overpass, sans-serif;
+    --font-fam-twcenmt: TW Cen MT, Overpass, sans-serif;
+
+    /* color scheme */
+    --color-garnet-1: #5c000a;
+    --color-garnet-1-7f: rgba(92, 0, 10, .5);
+    --color-garnet-2: #8a0312;
+    --color-garnet-3: #b01717;
+    --color-garnet-3-7f: rgba(176, 23, 23, .5);
+    --color-garnet-3-00: rgba(176, 23, 23, 0);
+    --color-garnet-4: #d43939;
+    --color-garnet-5: #ff9a9a;
+    --color-gray-1: #625c5c;
+    --color-gray-1-3f: rgba(98, 92, 92, .25);
+    --color-white-1: #fff;
+    --color-white-1-af: rgba(255, 255, 255, .75);
+    --color-white-1-7f: rgba(255, 255, 255, .5);
+    --color-white-1-3f: rgba(255, 255, 255, .25);
+    --color-white-2: #f9c7c7;
+    --color-black-1: #000;
+    --color-black-1-7f: rgba(0, 0, 0, .5);
+
+    /* colors that are used in section chunks */
+    /* these init variables are used to make the color alternation easier */
+    --color-chunk-tone-init-1: #fff; /* background color */
+    --color-chunk-tone-init-2: #fee; /* secondary color */
+
+    --color-chunk-tone-1: var(--color-chunk-tone-init-1);
+    --color-chunk-tone-2: var(--color-chunk-tone-init-2);
+    --color-chunk-tone-3: #fcc; /* other secondary color */
+
+    --header-height: 300px;
+    --header-logo-size: 0;
+
+    --bar-padding: 36px;
+    --bar-padding-right: calc(var(--bar-padding) + 3vw);
+
+    --team-member-icon-size-large: 72px;
+    --team-member-icon-size-small: 56px;
+
+    --nav-gradient-start-offset: 20px;
+    --nav-gradient-end-offset: calc(var(--header-height) * 7 / 8);
+
+    /* --nav-content-start-offset: calc(var(--header-height) / 2 - var(--nav-width) - 2 * var(--nav-link-margin)); */
+    --nav-content-start-offset: 0;
+
+    --nav-width: 170px;
+    --nav-margin: 4vw;
+    --nav-size: calc(var(--nav-width) + var(--nav-margin));
+    --nav-reservation-small: calc(var(--nav-width) + 2 * var(--nav-margin));
+    --nav-reservation: var(--nav-reservation-small);
+
+    --nav-link-margin: 10px;
+
+    --footer-padding-left: calc(2 * var(--bar-padding) + 5%);
+
+    --gallery-image-min-width: 200px;
+    --gallery-image-height: 200px;
+    --gallery-n-columns: 4;
+
+    --ease-out-circle: cubic-bezier(0, .5, .5, 1);
+}
+
+body.homepage {
+    --header-height: 100vh;
+    --header-logo-size: 250px;
+}
+
+body.teampage {
+    --header-height: 350px;
+}
+
+/* General rules that apply to all elements of a type on the page */
+
+textarea,
+input {
+    padding: .3em .6em;
+
+    font-family: var(--font-fam-overpass);
+    font-weight: 600;
+}
+
+button,
+input[type="submit"] {
+    padding: .3em .6em;
+}
+
+button,
+input[type="submit"],
+.button {
+    border: 0;
+    filter: brightness(1);
+    cursor: pointer;
+    
+    /* transition: filter .2s ease-out; */
+}
+
+input[type="submit"]:hover,
+button:hover,
+.button:hover {
+    filter: brightness(1.25);
+}
+
+input[type="submit"]:active,
+button:active,
+.button:active {
+    filter: brightness(.8);
+}
+
+textarea::placeholder,
+input::placeholder {
+    opacity: .5;
+}
+
+table {
+    border-spacing: .8em;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+    margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+th {
+    font-family: var(--font-fam-twcenmt);
+    font-stretch: 75%;
+    font-weight: 800;
+}
+
+h1 {
+    font-size: 3.5em;
+}
+
+h2 {
+    font-size: 2.5em;
+    color: var(--color-garnet-1);
+}
+
+h3 {
+    font-size: 1.8em;
+    color: var(--color-garnet-2);
+}
+
+h4,
+th {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--color-garnet-3);
+}
+
+th[scope="row"] {
+    text-align: right;
+}
+
+p {
+    margin: .5em 0 .5em 2.5em;
+    
+    line-height: 2.25;
+}
+
+a {
+    color: var(--color-garnet-4);
+}
+a:hover {
+    color: var(--color-garnet-5);
+}
+a:active {
+    color: var(--color-garnet-2);
+}
+
+prefer-nobr {
+    display: inline-block;
+}
+
+/* Speaker declarations */
+
+speaker-declaration {
+    display: block;
+    margin-right: 2em;
+
+    font-weight: 800;
+    font-size: .8em;
+    text-align: right;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+}
+
+speaker-declaration:before {
+    margin-right: .5em;
+    content: "—";
+}
+
+
+/* Buttons */
+
+/* Controls the animation of the nav links and buttons upon hover */
+/* The animation utilizes changing the background-size of gradients from 0 to 100% */
+/* Theoretically, this animation would use box-shadows, but they (a) cannot achieve the <nav-grid-rack> link animation and (b) reject percentage lengths */
+
+nav > nav-content .link:not(.link-home),
+button-grid > *,
+navigation-button {
+    transition: background-size .15s var(--ease-out-circle);
+}
+nav > nav-content .link:not(.link-home):hover,
+button-grid > :hover,
+gallery-filter-rows > form > :hover,
+navigation-button:hover {
+    background-size: 100% 100%;
+}
+
+/* general button template */
+button-grid > *,
+gallery-filter-rows > form > label,
+navigation-button {
+    text-align: center;
+    color: var(--color-garnet-3);
+    background: linear-gradient(var(--color-chunk-tone-2), var(--color-chunk-tone-2)) no-repeat center,
+            linear-gradient(var(--color-chunk-tone-3), var(--color-chunk-tone-3)) center;
+    background-size: 0 100%, 100% 100%;
+    cursor: pointer;
+    user-select: none;
+}
+
+button-grid > :hover,
+gallery-filter-rows > form > label:hover,
+navigation-button:hover {
+    color: var(--color-garnet-4);
+}
+
+/* Button grids */
+
+button-grid {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: .5em;
+}
+
+button-grid > * {
+    padding: .3em 1em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    font-family: var(--font-fam-twcenmt);
+    font-stretch: 75%;
+    font-weight: 800;
+    font-size: 2em;
+    text-decoration: inherit;
+    
+    transition-duration: .15s;
+}
+
+/* Lists of horizontal bars */
+
+bar-item {
+    padding: 8px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: auto auto auto;
+
+    font-size: .8em;
+    background: var(--color-garnet-5);
+}
+
+bar-item > * {
+    padding: 0 .2em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Gallery */
+
+gallery-filter-rows {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1em 2em;
+    margin-top: 1em;
+}
+
+gallery-filter-rows > form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+gallery-filter-rows > form > * {
+    padding: .2em .4em;
+    margin-left: 1em;
+
+    font-weight: 700;
+}
+
+gallery-filter-rows > form > input {
+    display: none;
+}
+
+gallery-filter-rows > form > label {
+    margin-bottom: .6em;
+
+    transition: background-size .15s var(--ease-out-circle),
+            box-shadow .2s var(--ease-out-circle);
+}
+
+gallery-filter-rows > form > input:checked + label {
+    box-shadow: 0 0 0 4px var(--color-garnet-3);
+}
+
+gallery-grid {
+    margin: 1em .5em;
+    display: grid;
+    /* minmax here stretches the images so that one row of images occupies the entire space */
+    grid-template-columns: repeat(var(--gallery-n-columns), minmax(var(--gallery-image-min-width), 1fr));
+    grid-auto-rows: var(--gallery-image-height);
+    gap: 1em;
+}
+
+gallery-grid > gallery-item > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+gallery-grid > gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+paginator- {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+paginator- navigation-button {
+    margin: 0 .3em;
+    padding: 0 .3em;
+    font-size: 1.25em;
+}
+
+paginator- navigation-button:before {
+    letter-spacing: .1em;
+}
+
+paginator- navigation-button.arrow-left-end:before {
+    content: "[";
+}
+
+paginator- navigation-button.arrow-left:before {
+    content: "−−";
+}
+
+paginator- navigation-button.arrow-right:before {
+    content: "++";
+}
+
+paginator- navigation-button.arrow-right-end:before {
+    content: "]";
+}
+
+paginator- paginator-display {
+    margin: 0 1.5em;
+    display: flex;
+    align-items: center;
+}
+
+paginator- paginator-counter {
+    width: 2.5em;
+    position: relative;
+    top: -.3em;
+}
+
+paginator- paginator-counter input {
+    width: 100%;
+    padding: 0;
+    border: 1px solid var(--color-garnet-5);
+
+    font-size: 1.2em;
+    font-weight: 800;
+    text-align: right;
+    color: var(--color-garnet-3);
+}
+
+paginator- paginator-number-max {
+    position: relative;
+    top: .5em;
+
+    font-size: .8em;
+}
+
+/* Slideshows */
+
+slideshow- {
+    display: grid;
+    grid-template-columns: 24px auto 24px;
+    /* slideshow dimensions are specified on the children */
+    grid-template-rows: auto auto auto;
+    column-gap: 10px;
+    row-gap: 6px;
+
+    text-align: center;
+}
+
+slideshow- > navigation-button {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    background-size: 100% 0, 100% 100%;
+}
+
+slideshow- > navigation-button:before {
+    content: "▲";
+    transform-origin: center;
+}
+
+slideshow- > navigation-button.arrow-left {
+    grid-row: 1;
+    grid-column: 1;
+}
+
+slideshow- > navigation-button.arrow-left:before {
+    transform: rotate(-90deg);
+}
+
+slideshow- > navigation-button.arrow-right {
+    grid-row: 1;
+    grid-column: 3;
+}
+
+slideshow- > navigation-button.arrow-right:before {
+    transform: rotate(90deg);
+}
+
+slideshow- > slideshow-media {
+    grid-row: 1;
+    grid-column: 2;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+
+    background: var(--color-chunk-tone-2);
+}
+
+slideshow- > slideshow-media > a {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+slideshow- > slideshow-media img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+
+    /* filter: drop-shadow(0 0 6px var(--color-garnet-1-7f)); */
+}
+
+slideshow- > slideshow-caption {
+    grid-row: 2;
+    grid-column: 1 / 4;
+
+    font-size: .8em;
+}
+
+slideshow- > slideshow-note {
+    grid-row: 3;
+    grid-column: 1 / 4;
+
+    font-size: .8em;
+    font-style: italic;
+}
+
+/* Image link animation */
+
+gallery-grid > gallery-item > a img,
+slideshow- > slideshow-media > a img {
+    transition: transform var(--ease-out-circle),
+            filter var(--ease-out-circle);
+}
+
+gallery-grid > gallery-item > a img {
+    transition-duration: .1s;
+}
+slideshow- > slideshow-media > a img {
+    transition-duration: .15s;
+}
+
+gallery-grid > gallery-item > a:hover img {
+    transform: scale(1.15);
+}
+slideshow- > slideshow-media > a:hover img {
+    transform: scale(1.1);
+}
+
+gallery-grid > gallery-item > a:hover img {
+    filter: sepia(.5) brightness(1.5) contrast(1.25);
+}
+slideshow- > slideshow-media > a:hover img {
+    filter: brightness(1.25) contrast(1.25);
+}
+
+navigation-button.disabled {
+    pointer-events: none;
+
+    opacity: .3;
+}
+
+/* Team member lists */
+
+team-roster {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
+team-member {
+    margin-bottom: 1em;
+    display: grid;
+    grid-template-columns: var(--team-member-icon-size-small) minmax(0, auto); /* minmax(0, auto) prevents overflow */
+    column-gap: .7em;
+}
+
+team-member > team-member-image {
+    height: var(--team-member-icon-size-small);
+    margin: auto 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+
+    background: var(--color-chunk-tone-1);
+    border-radius: 50%;
+    border: 4px solid var(--color-garnet-2);
+}
+
+team-member > team-member-image > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+team-member > team-member-descriptor {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+team-member > team-member-descriptor > h3 {
+    overflow-wrap: break-word;
+    text-transform: uppercase;
+}
+
+team-member.large {
+    grid-column: 1 / -1;
+    grid-template-columns: var(--team-member-icon-size-large) auto;
+}
+
+team-member.large > team-member-image {
+    height: var(--team-member-icon-size-large);
+}
+
+team-member.large + team-member:not(.large) {
+    margin-top: .5em;
+}
+
+team-member:not(.large) {
+    font-size: .7em;
+    padding: 0 1em;
+}
+
+/* Main */
+
+main {
+    display: grid;
+    /* 1 : everything above footer
+     * 2 : footer
+     */
+    grid-template-rows: auto min-content;
+    /* 1 : nav (including margin)
+     * 2 : all other content
+     */
+    grid-template-columns: var(--nav-size) 1fr;
+    min-width: var(--page-min-width);
+    min-height: 100vh;
+
+    font-size: 1.2em;
+}
+
+main > central-content {
+    grid-row: 1;
+    grid-column: 1 / 3;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+
+header {
+    min-height: var(--header-height);
+    display: grid;
+    grid-template-rows: 1fr min-content 1fr;
+    grid-template-columns: var(--nav-reservation-small) auto;
+
+    color: #fff;
+}
+
+body.homepage header {
+    grid-template-rows: 1fr min-content 1fr 10vh;
+}
+
+header > header-media {
+    grid-row: 1 / 5;
+    grid-column: 1 / 3;
+    display: grid;
+
+    /* filter: brightness(.5) contrast(1.5) sepia(.7) blur(3px); */
+    filter: brightness(.5);
+
+    pointer-events: none;
+    user-select: none;
+
+    /* media goes over lower page content if not present */
+    z-index: -1;
+}
+
+header > header-media img {
+    grid-row: 1;
+    grid-column: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+header > header-media:after {
+    grid-row: 1;
+    grid-column: 1;
+    display: block;
+    content: " ";
+
+    background: linear-gradient(to right, var(--color-black-1-7f) 0%, transparent 30%, transparent 70%, var(--color-black-1-7f) 100%);
+}
+
+header > header-titlecard {
+    grid-row: 2;
+    grid-column: 2;
+    margin: auto 0;
+    margin-right: var(--bar-padding);
+    padding: 1em 0;
+    display: grid;
+    gap: 1em;
+    /*  * columns *
+     * 1 : logo
+     * 2 : titles
+     *
+     *  * rows *
+     * 1 : logo and title
+     * 2 : official team name
+     */
+    grid-template-columns: var(--header-logo-size) 1fr;
+    grid-template-rows: auto auto;
+
+    filter: drop-shadow(10px 0 10px var(--color-black-1-7f));
+}
+
+header > header-titlecard > header-logo {
+    grid-row: 1;
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+header > header-titlecard > h1 {
+    grid-row: 1;
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    font-size: 5em;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+header > header-titlecard > header-subtitle {
+    grid-row: 2;
+    grid-column: 2;
+    display: block;
+
+    font-size: 2.5em;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+header > svg {
+    grid-row: 4;
+    grid-column: 1 / 3;
+    width: 100%;
+    height: 100%;
+}
+
+header > header-slogan {
+    grid-row: 3;
+    grid-column: 2;
+    margin: auto calc(var(--bar-padding) + 3%) calc(1em + 1vh) 0;
+
+    text-align: right;
+    font-size: 1.75em;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 1.25;
+}
+
+main > central-content > primary-content {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: auto fit-content(45%);
+
+    color: var(--color-gray-1);
+    background: var(--color-chunk-tone-1);
+}
+
+/* Content chunks */
+
+.content-chunk {
+    padding: var(--bar-padding) var(--bar-padding-right) var(--bar-padding) var(--nav-reservation);
+    display: flex;
+    position: relative;
+}
+
+.content-chunk > chunk-decal {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    width: 35%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    overflow: hidden;
+
+    filter: invert(1) contrast(.9) sepia(1) hue-rotate(-70deg);
+    mix-blend-mode: multiply;
+
+    user-select: none;
+    pointer-events: none;
+}
+
+.content-chunk > chunk-decal > img {
+    object-fit: cover;
+    object-position: left;
+    height: 100%;
+}
+
+/* `flex-grow` on these usually should have no effect (since they use the entire space), unless one is missing */
+.content-chunk > chunk-text {
+    flex: 100% 1 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.content-chunk > chunk-other {
+    flex: 45% 1 1;
+    margin-left: 2em;
+}
+.content-chunk > chunk-other:empty {
+    flex-basis: 0;
+    margin: 0;
+}
+
+content-chunks > .content-chunk {
+    background: var(--color-chunk-tone-1);
+}
+
+content-chunks > .content-chunk bar-item {
+    background: var(--color-chunk-tone-2);
+}
+
+content-chunks > .content-chunk:nth-child(even) {
+    flex-direction: row-reverse;
+
+    /* as previously defined, but swapped */
+    --color-chunk-tone-1: var(--color-chunk-tone-init-2);
+    --color-chunk-tone-2: var(--color-chunk-tone-init-1);
+}
+
+content-chunks > .content-chunk:nth-child(even) > chunk-other {
+    margin-left: 0;
+    margin-right: 2em;
+}
+
+content-chunks > .content-chunk:nth-child(even) > chunk-other:empty {
+    margin-right: 0;
+}
+
+main > central-content > primary-content > content-chunks > .content-chunk > chunk-other {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+main > central-content > primary-content > aside {
+    grid-column: 2;
+    grid-row: 1;
+    padding: var(--bar-padding);
+    padding-right: var(--bar-padding-right);
+
+    background: var(--color-chunk-tone-2);
+}
+
+/* =================================================================================================================
+/* <nav> bar */
+
+/* Gradient at the top of the nav is hidden upon navigation away from the homepage */
+nav {
+    grid-row: 1;
+    grid-column: 1;
+    margin-left: var(--nav-margin);
+    padding-top: var(--nav-content-start-offset);
+    position: relative;
+
+    background: linear-gradient(to bottom, var(--color-garnet-3-00) var(--nav-gradient-start-offset), var(--color-garnet-3) var(--nav-gradient-end-offset));
+    background-size: auto calc(100% + var(--nav-gradient-end-offset));
+    background-position: bottom;
+    color: #fff;
+    /* filter: drop-shadow(10px 0 25px var(--color-garnet-1-7f)); */
+
+    transition: background-position .5s ease;
+}
+
+body.homepage nav {
+    background-position: top;
+}
+
+/* only child of the <nav> that stickies to the browser window */
+nav > nav-content {
+    position: sticky;
+    top: 0;
+    padding: 2em 0;
+    display: block;
+    max-height: 100vh;
+    overflow-y: auto;
+
+    font-family: var(--font-fam-twcenmt);
+    font-stretch: 75%;
+    font-weight: 700;
+    font-size: 1.3em;
+    line-height: .9;
+    text-transform: uppercase;
+}
+
+nav > nav-content .link {
+    cursor: pointer;
+    color: inherit;
+    text-decoration: inherit;
+
+    user-select: none;
+}
+
+nav > nav-content > .link {
+    display: block;
+    margin: 0 var(--nav-link-margin);
+    padding: .3em 8px;
+}
+
+nav > nav-content > .link:not(.link-home) {
+    margin-top: .2em;
+
+    /* Gradients appear on sides and close in */
+    background: linear-gradient(to right, var(--color-white-1-3f) 50%, transparent 50%) no-repeat left,
+            linear-gradient(to left, var(--color-white-1-3f) 50%, transparent 50%) no-repeat right;
+    background-size: 0 100%;
+}
+
+nav > nav-content > nav-grid-rack {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 1em;
+    padding-left: .5em;
+    padding-right: .3em;
+    margin-bottom: .5em;
+
+    font-size: .9em;
+    color: var(--color-white-1-af);
+    background: var(--color-garnet-1-7f);
+    box-shadow: 0 10px 20px -10px var(--color-garnet-1) inset;
+}
+
+nav > nav-content > nav-grid-rack > .link {
+    padding: .2em .3em;
+
+    /* Gradient appears at center and expand out */
+    background: linear-gradient(var(--color-white-1-3f), var(--color-white-1-3f)) no-repeat top;
+    background-size: 0 100%;
+
+    transition-duration: .1s;
+}
+
+nav > nav-content > nav-grid-rack > .link:hover {
+    color: #fff;
+}
+
+nav > nav-content > .link-home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: .3em;
+    margin-bottom: .7em;
+
+    border-bottom: .1em solid;
+}
+
+/* Controls the little jumping animation the logo upon hovering the home link */
+nav > nav-content > .link-home > svg {
+    width: 75%;
+    transform: translateY(0);
+
+    filter: drop-shadow(0 10px 4px var(--color-garnet-1-7f));
+
+    transition: transform .3s ease,
+            filter .3s ease;
+}
+
+nav > nav-content > .link-home > svg > use[href="#logo-gear"] {
+    transform: rotate(0turn);
+
+    /* Deals with ease out */
+    transition: transform 1s ease;
+}
+
+nav > nav-content > .link-home:hover > svg {
+    transform: translateY(-10px) scale(1.1);
+
+    filter: drop-shadow(0 20px 10px var(--color-garnet-1-7f));
+}
+
+nav > nav-content > .link-home:hover > svg > use[href="#logo-gear"] {
+    transform: rotate(calc(1turn / 6));
+    
+    /* Deals with ease in */
+    transition: transform .4s ease;
+}
+
+nav > nav-content > .link-home > div {
+    transform: scaleY(.8);
+
+    font-weight: 800;
+    font-size: 3em;
+}
+
+/* Footer */
+
+footer {
+    grid-row: 2;
+    grid-column: 1 / 3;
+
+    background: var(--color-garnet-1);
+    color: var(--color-white-1);
+
+    --color-chunk-tone-1: var(--color-garnet-1);
+    --color-chunk-tone-2: var(--color-garnet-2);
+}
+
+footer.content-chunk {
+    padding-left: var(--footer-padding-left);
+}
+
+footer h2 {
+    color: var(--color-white-1);
+}
+
+contact-container {
+    display: flex;
+}
+
+contact-container > form {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 360px;
+}
+
+contact-container > form input,
+contact-container > form textarea {
+    border: 0;
+
+    background: var(--color-chunk-tone-2);
+    color: var(--color-white-2);
+    font-size: .8em;
+}
+
+contact-container > form input::placeholder,
+contact-container > form textarea::placeholder {
+    color: var(--color-white-1-7f);
+}
+
+contact-container > form input[type="submit"] {
+    font-family: var(--font-fam-twcenmt);
+    font-stretch: 75%;
+    font-weight: 700;
+    font-size: 1.5em;
+    color: var(--color-white-1);
+}
+
+contact-container > form > * {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+contact-container > form > div {
+    width: 100%;
+}
+
+contact-container > form > div > .message {
+    min-height: 8em;
+    resize: vertical;
+}
+
+contact-container > contact-info {
+    margin-left: 1.5em;
+    display: flex;
+    flex-direction: column;
+}
+
+contact-container > contact-info > * {
+    margin-top: 1em;
+}
+
+copyright-info {
+    display: block;
+
+    text-align: right;
+    font-size: .8em;
+}
+
+/* SVG and logo animation */
+
+svg.defs {
+    display: none;
+}
+
+/* These variables can be adjusted on a `<use />` element to manipulate the logo instance */
+svg {
+    --fill-logo-gear-outline: #adafb2;
+    --fill-logo-gear-fill: #fff;
+    --fill-logo-letter-1: #8a2529;
+    --fill-logo-letter-2: #adafb2;
+}
+
+svg use[href="#logo-gear"] {
+    transform-origin: center;
+}
+
+/* This selector alters the color scheme of the logo to help it conform to light-on-dark styles */
+svg use.logo-white {
+    --fill-logo-gear-outline: #fff;
+    --fill-logo-gear-fill: transparent;
+    --fill-logo-letter-1: #fff;
+    --fill-logo-letter-2: transparent;
+}
+
+/* This animation controls the slow rotation of the logo’s gear on the homepage header */
+@keyframes logo-gear-rotate {
+    from { transform: rotate(0turn); }
+    to { transform: rotate(1turn); }
+}
+svg use.logo-gear-rotate {
+    transform: rotate(0turn);
+
+    animation: logo-gear-rotate 60s infinite linear;
+}
+
+/* Other things */
+
+/* If translucent colors can be a selection color (all but Edge) [the selector here doesn’t truly reflect that] */
+@supports (color: #0000) {
+    ::selection {
+        background: var(--color-garnet-3-7f);
+        color: var(--color-white-1);
+    }
+
+    header ::selection,
+    footer ::selection {
+        background: var(--color-white-1-7f);
+    }
+}
+
+/* *****************************************************************************************************************
+/* RESPONSIVE DESIGN 
+/* ***************************************************************************************************************** */
+
+@media screen and (max-width: 1600px) {
+    main {
+        font-size: 1em;
+    }
+
+    nav > nav-content > nav-grid-rack {
+        font-size: 1em;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    body {
+        --bar-padding: 24px;
+
+        --nav-width: 130px;
+        --nav-margin: 0px;
+        --nav-reservation: calc(var(--nav-reservation-small) + var(--bar-padding));
+        
+        --gallery-image-min-width: 160px;
+        --gallery-image-height: 120px;
+        --gallery-n-columns: auto-fill;
+    }
+    
+    body.homepage {
+        --header-logo-size: 175px;
+    }
+
+    header {
+        grid-template-rows: minmax(2em, 1fr) min-content 1fr 30px;
+        grid-template-columns: var(--nav-reservation-small) auto;
+    }
+
+    header > header-titlecard {
+        grid-template-rows: var(--header-logo-size) auto auto;
+        grid-template-columns: auto;
+    }
+
+    header > header-titlecard > h1 {
+        grid-row: 2;
+        grid-column: 1;
+
+        text-align: center;
+        font-size: 4.5em;
+    }
+
+    header > header-titlecard > header-subtitle {
+        grid-row: 3;
+        grid-column: 1;
+
+        text-align: center;
+        font-size: 2em;
+    }
+
+    header > header-slogan {
+        font-size: 1.5em;
+        margin-bottom: 0;
+        margin-right: var(--bar-padding);
+
+        text-align: center;
+    }
+
+    main > central-content > primary-content {
+        grid-template-columns: auto;
+    }
+
+    main > central-content > primary-content > aside {
+        grid-column: 1;
+        grid-row: 2;
+
+        padding-left: var(--nav-reservation);
+    }
+
+    /* nav {
+        filter: drop-shadow(0 0 15px var(--color-garnet-1-7f));
+    } */
+
+    nav > nav-content > .link {
+        --nav-link-margin: 12px;
+    }
+    
+    nav > nav-content > .link-home > svg {
+        width: initial;
+    }
+
+    footer.content-chunk {
+        padding-left: var(--bar-padding-right);
+    }
+
+    contact-container {
+        flex-direction: column;
+    }
+
+    contact-container > contact-info {
+        margin-left: 0;
+
+        text-align: center;
+    }
+
+    footer > chunk-other {
+        margin-top: 1em;
+    }
+
+    copyright-info {
+        text-align: center;
+    }
+}
+
+@media screen and (max-width: 960px) {
+    header > header-titlecard > h1 {
+        grid-row: 2;
+        grid-column: 1;
+
+        text-align: center;
+        font-size: 4em;
+    }
+
+    .content-chunk,
+    content-chunks > .content-chunk:nth-child(even) {
+        flex-direction: column;
+    }
+
+    .content-chunk > chunk-other,
+    content-chunks > .content-chunk:nth-child(even) > chunk-other {
+        flex: 100% 0 1;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+/* *****************************************************************************************************************
+/* FALLBACKS 
+/* ***************************************************************************************************************** */
+
+/* If chunk decals will not appear translucent (Edge) */
+@supports not (mix-blend-mode: multiply) {
+    .content-chunk > chunk-decal {
+        display: none;
+    }
+}
