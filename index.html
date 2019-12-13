@@ -9,7 +9,7 @@
         <meta charset="UTF-8" />
         <meta description="Be on the team that stands out from the crowd" />
 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width" />
         <meta name="theme-color" content="#5c000a" />
 
         <link href="/stogarobotics/img/logo/cgear.png" rel="icon" />
@@ -28,7 +28,9 @@
             <!-- all the bars and the header -->
             <central-content>
                 <!-- top part of the site that contains the title and image -->
-                <header id="header">
+                <header>
+                    <floating-anchor id="header"></floating-anchor>
+
                     <!-- image background of the header -->
                     <header-media>
                         <img src="/stogarobotics/img/front.jpg" />
@@ -61,7 +63,9 @@
                 <!-- white/gray bars that contain info about the team -->
                 <primary-content>
                     <content-chunks>
-                        <section class="content-chunk" name="about" id="about">
+                        <section class="content-chunk" name="about">
+                            <floating-anchor id="about"></floating-anchor>
+
                             <chunk-text>
                                 <h2>Who?</h2>
                                 <!-- paragraph copied from original site -->
@@ -118,7 +122,9 @@
                             <chunk-other></chunk-other>
                         </section>
 
-                        <section class="content-chunk" name="teams" id="teams">
+                        <section class="content-chunk" name="teams">
+                            <floating-anchor id="teams"></floating-anchor>
+
                             <chunk-decal>
                                 <img src="/stogarobotics/img/decal/DSC_0076.png" />
                             </chunk-decal>
@@ -144,7 +150,9 @@
                             </chunk-other>
                         </section>
 
-                        <section class="content-chunk" name="gratitude" id="gratitude">
+                        <section class="content-chunk" name="gratitude">
+                            <floating-anchor id="gratitude"></floating-anchor>
+
                             <chunk-text>
                                 <h2>Gratitude</h2>
                                 <p>Placeholder text</p>
@@ -153,7 +161,9 @@
                             <chunk-other></chunk-other>
                         </section>
 
-                        <section class="content-chunk" name="signups" id="signups">
+                        <section class="content-chunk" name="signups">
+                            <floating-anchor id="signups"></floating-anchor>
+
                             <chunk-decal>
                                 <img src="/stogarobotics/img/decal/gallery5.png" />
                             </chunk-decal>
@@ -207,6 +217,8 @@
                         <div>CRT</div>
                     </a>
 
+                    <nav-separator></nav-separator>
+
                     <a class="link" href="/stogarobotics/#about">About</a>
                     <a class="link" href="/stogarobotics/programs/">Programs</a>
                     <a class="link" href="/stogarobotics/#teams">Team pages</a>
@@ -226,7 +238,9 @@
             </nav>
 
             <!-- footer -->
-            <footer class="content-chunk" id="contact">
+            <footer class="content-chunk">
+                <floating-anchor id="contact"></floating-anchor>
+
                 <chunk-text>
                     <h2>Contact us!</h2>
                     <contact-container>
@@ -239,7 +253,7 @@
                             </div>
                             <div>
                                 <label for="contact-email">Email</label>
-                                <input class="email" name="_replyto" id="contact-email" type="text" placeholder="rst@uvw.xyz" spellcheck="false" required />
+                                <input class="email" name="_replyto" id="contact-email" type="text" placeholder="opqrst@uvw.xyz" spellcheck="false" required />
                             </div>
                             
                             <div>
@@ -261,7 +275,7 @@
                 </chunk-text>
 
                 <chunk-other>
-                    <copyright-info>© 2019 <prefer-nobr>Conestoga Robotics Team.</prefer-nobr> <prefer-nobr>All rights reserved.</prefer-nobr></copyright-info>
+                    <copyright-info>© <copyright-year>2020</copyright-year> <prefer-nobr>Conestoga Robotics Team.</prefer-nobr> <prefer-nobr>All rights reserved.</prefer-nobr></copyright-info>
                 </chunk-other>
             </footer>
         </main>

@@ -1,9 +1,18 @@
 import "./ce.js";
 import {qs, qsa, createElement} from "./util.js";
 
+// Edge fallback
+if (!Array.prototype.flat) {
+    Array.prototype.flat = function () {
+        return this.reduce((accumulator, item) => accumulator.concat(item), []);
+    };
+}
+
 // for (let element of qsa(".js-loading")) {
 //     element.appendChild();
 // }
+
+qs("footer copyright-year").textContent = new Date().getUTCFullYear();
 
 function loadAwards(teamNumber) {
     return new Promise(resolve => {
@@ -35,13 +44,27 @@ function loadAwards(teamNumber) {
         createElement("bar-item", {
             children: [
                 createElement("div", {
-                    textContent: award.team,
+                    children: [
+                        createElement("a", {
+                            properties: {
+                                href: `./teams/${award.team}/`,
+                            },
+                            textContent: award.team,
+                        }),
+                    ],
                 }),
                 createElement("h4", {
                     textContent: award.name,
                 }),
                 createElement("div", {
-                    textContent: award.sku,
+                    children: [
+                        createElement("a", {
+                            properties: {
+                                href: `https://vexdb.io/events/view/${award.sku}`,
+                            },
+                            textContent: award.sku,
+                        }),
+                    ],
                 }),
             ],
 
