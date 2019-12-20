@@ -1,3 +1,7 @@
+/**
+ * @file Defines all custom elements.
+ */
+
 import {qsa} from "./util.js";
 import {Slideshow} from "./ce/Slideshow.js";
 
@@ -10,7 +14,7 @@ import {Slideshow} from "./ce/Slideshow.js";
         window.customElements = {
             define(tagName, fn) {
                 // Iterate through each element with the given tag name
-                for (let element of qsa(tagName)) {
+                for (const element of qsa(tagName)) {
                     // Copy class methods over
                     element.__proto__ = fn.prototype;
 
@@ -24,7 +28,7 @@ import {Slideshow} from "./ce/Slideshow.js";
     }
 
     // Semantic elements
-    for (let tagName of [
+    for (const tagName of [
         "central-content",          // Contains all content behind the nav and above the footer (Recommended only as a direct child of [main])
         "header-media",             // Holds the background for the header; allows filters to be applied without affecting other header content
         "header-titlecard",         // Contains the logo, title and subtitle for the header
@@ -32,7 +36,7 @@ import {Slideshow} from "./ce/Slideshow.js";
         "header-subtitle",          // Contains the subtitle text for the header
         "header-slogan",            // Contains the call-to-action text for the header
         "content-chunks",           // Contains all the content chunks on the central page
-        "floating-anchor",             // Offsets a page anchor jump (as to not be covered by the compact <nav>)
+        "floating-anchor",          // Offsets a page anchor jump (as to not be covered by the compact <nav>)
         "chunk-decal",              // Displays a subtle background image for a content chunk
         "chunk-text",               // Holds the main portion of content in a content chunk
         "chunk-other",              // Holds the secondary portion of content in a content chunk
@@ -47,7 +51,9 @@ import {Slideshow} from "./ce/Slideshow.js";
         "paginator-counter",        // Displays the current page number of a paginator
         "paginator-number-max",     // Displays the maximum page number of a paginator
         "navigation-button",        // Serves as a button used to move along in a sequence, eg update a page number
+        "big-number",
         "button-grid",              // Organizes buttons into a grid
+        "block-grid",
         "bar-list",                 // Contains multiple <bar-item>s
         "bar-item",                 // Contains a key-value bar with a header and short explanatory text
         "team-roster",              // Lists all the members of a team (Recommended only as a direct child of [primary-content > aside])
@@ -62,6 +68,7 @@ import {Slideshow} from "./ce/Slideshow.js";
         "copyright-year",           // Contains the copyright year
         "prefer-nobr",              // Prioritizes the contained text last when a line break is to occur on some text
         "speaker-declaration",      // States the speaker of a quote
+        "text-notice",              
     ]) {
         customElements.define(tagName, class extends HTMLElement {});
     }

@@ -1,12 +1,12 @@
 /**
- * @file Solely used to define a collection of utility methods to facilitate codewriting in any other file. util.js should have 0 dependencies.
+ * @file Solely used to define a collection of utility methods to facilitate codewriting in any other file. This script should have 0 dependencies.
  */
 
 export const qs = (selector, context=document) => context.querySelector(selector);
 export const qsa = (selector, context=document) => context.querySelectorAll(selector);
 
 /**
- * Creates an element and specifies numerous properties regarding it.
+ * Creates an element and specifies various properties regarding it in a single function call.
  * @param {string|function} tagNameOrConstructor The tag name of the new element or the constructor that creates it.
  * @param {object} [options] Properties pertaining to the object.
  */
@@ -19,6 +19,7 @@ export function createElement(tagNameOrConstructor="div", {
     attributes=[],
     children=[],
     parent=null,
+    callback=null,
 }={}) {
     let element;
 
@@ -27,21 +28,20 @@ export function createElement(tagNameOrConstructor="div", {
         element = !namespace ? context.createElement(tagName) : context.createElementNS(namespace, tagName);
 
     } else if (typeof tagNameOrConstructor === "function") { // constructor
-        const fn = tagNameOrConstructor;
-        element = new fn();
+        element = new tagNameOrConstructor();
     }
 
     element.textContent = textContent;
 
-    for (let className of classes) {
+    for (const className of classes) {
         element.classList.add(className);
     }
 
-    for (let [key, value] of Object.entries(properties)) {
+    for (const [key, value] of Object.entries(properties)) {
         element[key] = value;
     }
 
-    for (let [key, value, namespace] of attributes) {
+    for (const [key, value, namespace] of attributes) {
         if (!namespace) {
             element.setAttribute(key, value);
         } else {
@@ -49,7 +49,7 @@ export function createElement(tagNameOrConstructor="div", {
         }
     }
 
-    for (let child of children) {
+    for (const child of children) {
         element.appendChild(child);
     }
 
@@ -57,14 +57,18 @@ export function createElement(tagNameOrConstructor="div", {
         parent.appendChild(element);
     }
 
+    if (callback) {
+        callback.call(this);
+    }
+
     return element;
 }
 
-// Removes all the children of an element
+/**
+ * Removes all the children of an element.
+ */
 export function declade(element) {
-    while (element.lastElementChild) {
-        element.lastElementChild.remove();
-    }
+    element.innerHTML = "";
     return element;
 }
 
@@ -73,8 +77,10 @@ export function scrollToBottom(element) {
     return element;
 }
 
-// Calculates the location of a click relative to an element
-export const relcoords = (mouseEvent, target, method=0) => {
+/**
+ * Calculates the location of a mouse event relative to an element.
+ */
+export function relcoords(mouseEvent, target, method=0) {
     if (!target) target = mouseEvent.currentTarget;
 
     if (!(target instanceof HTMLElement)) throw new TypeError(`Expected HTMLElement; got ${target.constructor.name}`);
@@ -89,7 +95,7 @@ export const relcoords = (mouseEvent, target, method=0) => {
         // Method 0: Use `getClientBoundingRect`: accurate with relative positioning, but not when CSS transformations are applied.
         default:
         case 0: {
-            let rect = target.getBoundingClientRect();
+            const rect = target.getBoundingClientRect();
 
             left = rect.left;
             top = rect.top;
@@ -109,28 +115,44 @@ export const relcoords = (mouseEvent, target, method=0) => {
     return {x, y};
 }
 
-// Creates a one-time pause in an async block when awaited
-// Only use when delaying once; use `requestAnimationFrame` when delaying multiple times quickly and timing matters
-export const wait = (ms=0) => {
+export function xhrGet(url) {
+    return new Promise((resolve, reject) => {
+        const req = new XMLHttpRequest();
+        req.addEventListener("load", () => {
+            resolve(JSON.parse(req.responseText));
+        });
+
+        req.addEventListener("error", reject);
+
+        req.open("GET", url);
+        req.send();
+    });
+}
+
+/**
+ * Creates a one-time pause in an async block when awaited.
+ * Only use when delaying once; use `requestAnimationFrame` when delaying multiple times quickly and timing matters.
+ */
+export function wait(ms=0) {
     return new Promise(resolve => {
         setTimeout(resolve, ms);
     });
 };
 
-export const arrult = array => {
+export function arrult(array) {
     if (!Array.isArray(array)) throw new TypeError(`Expected array; got ${array.constructor.name}`);
     return array[array.length - 1];
-};
-export const arrpenult = array => {
+}
+export function arrpenult(array) {
     if (!Array.isArray(array)) throw new TypeError(`Expected array; got ${array.constructor.name}`);
     return array[array.length - 2];
-};
+}
 
 export const mod = (dividend, divisor) => (dividend % divisor + divisor) % divisor;
 
-export const randfloat = (min=0, max=1) => {
+export function randfloat(min=0, max=1) {
     return Math.random() * (max - min) + min;
-};
-export const randint = (min=0, max=1) => {
+}
+export function randint(min=0, max=1) {
     return Math.floor(randfloat(min, max + 1));
-};
+}

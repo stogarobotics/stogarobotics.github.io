@@ -12,6 +12,8 @@ const pageCounter = qs("paginator- paginator-counter");
 const pageCounterInput = qs("paginator- paginator-counter input");
 const pageCounterMax = qs("paginator- paginator-number-max");
 
+const galleryGrid = declade(qs("gallery-grid"));
+
 const nResultsPerPage = 8;
 let nTotalMatchingEntries = 0;
 
@@ -78,6 +80,9 @@ const requestImages = (() => {
 })();
 
 async function fetchAndDisplayImages(options) {
+    declade(galleryGrid);
+    addNotice("loading");
+
     // Query the API
     const response = await requestImages(options);
 
@@ -94,9 +99,15 @@ async function fetchAndDisplayImages(options) {
     updateCurrentPageNumber();
     updateMaxPageNumber();
 
+    declade(galleryGrid);
+
     // Create gallery entries for each image
-    const galleryGrid = declade(qs("gallery-grid"));
-    for (let image of response.result) {
+    if (response.result.length === 0) {
+        addNotice("no images found");
+        return;
+    }
+
+    for (const image of response.result) {
         createElement("gallery-item", {
             children: [
                 createElement("a", {
@@ -119,6 +130,19 @@ async function fetchAndDisplayImages(options) {
             parent: galleryGrid,
         });
     }
+}
+
+function addNotice(text) {
+    createElement("gallery-item", {
+        classes: ["notice"],
+        children: [
+            createElement("text-notice", {
+                textContent: text,
+            }),
+        ],
+
+        parent: galleryGrid,
+    });
 }
 
 function updateCurrentPageNumber(n=nPage) {
