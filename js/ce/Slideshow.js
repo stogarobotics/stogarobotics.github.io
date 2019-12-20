@@ -1,4 +1,9 @@
+/**
+ * @file Provides functionality for the `<slideshow->` element.
+ */
+
 import {qs, createElement, declade, mod} from "../util.js";
+import {createNotice} from "../app-util.js";
 
 /**
  * Represents an element that allows users to click through and view a number of images and their captions.
@@ -77,7 +82,7 @@ export class Slideshow extends HTMLElement {
         // Remove image if there are no items
         if (!entry && this.entries.length === 0) {
             declade(this.mediaContainer);
-            this.setCaption("[no images found]");
+            this.setCaptionNotice("no images found");
             return;
         }
 
@@ -97,8 +102,19 @@ export class Slideshow extends HTMLElement {
     }
 
     setCaption(caption) {
-        this.captionContainer.textContent = caption || "[no caption]";
-        this.img.alt = caption;
+        if (!caption) {
+            this.setCaptionNotice("no caption");
+        } else {
+            this.captionContainer.textContent = caption;
+            this.img.alt = caption;
+        }
+
+        return this;
+    }
+    
+    setCaptionNotice(text) {
+        declade(this.captionContainer).appendChild(createNotice(text));
+        this.img.alt = text;
         return this;
     }
 }

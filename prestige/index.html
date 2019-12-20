@@ -4,7 +4,7 @@
 
 <html lang="en-US">
     <head>
-        <title>Team 6121A // Conestoga Robotics</title>
+        <title>Prestige // Conestoga Robotics</title>
 
         <meta charset="UTF-8" />
         <meta description="Be on the team that stands out from the crowd" />
@@ -23,7 +23,7 @@
         <link href="https://overpass-30e2.kxcdn.com/overpass.css" rel="stylesheet" />
     </head>
 
-    <body class="teampage">
+    <body class="prestigepage">
         <main>
             <!-- all the bars and the header -->
             <central-content>
@@ -33,14 +33,13 @@
 
                     <!-- image background of the header -->
                     <header-media>
-                        <img src="/stogarobotics/img/gallery/DSC_0105.jpg" />
+                        <img src="/stogarobotics/img/gallery/gallery2.jpg" />
                     </header-media>
 
                     <header-titlecard>
 
-                        <h1>Team 6121A</h1>
+                        <h1>Prestige</h1>
 
-                        <header-subtitle>The Pioneers</header-subtitle>
                     </header-titlecard>
 
 
@@ -49,95 +48,28 @@
                     <content-chunks>
                         <section class="content-chunk">
                             <chunk-text>
-                                <p>We are 6121A. We are a group of determined and hardworking engineers who aim to design, build, and program the best robots we can. We strive to bring home the trophy at every level of competition and always aim to make Stoga proud!</p>
+                                <p>Our total counts of events and awards are displayed here!</p>
 
-                                <h2>Performance</h2>
-                                <bar-list class="js-required"></bar-list>
-                                <p>View statistics and performances on <a href="https://vexdb.io/teams/view/6121A">VexDB</a></p>
+                                <noscript><p>JavaScript is required to load and view the data.</p></noscript>
 
-                                <h2>Gallery</h2>
-                                <slideshow->
-                                    <slideshow-media data-other-srcs="[]">
-                                        <img src="/stogarobotics/img/gallery/DSC_0105.jpg" alt="Team 6121A gallery image" />
-                                    </slideshow-media>
+                                <form class="stat-options js-required">
+                                    <h2>Event attendance</h2>
+                                    <block-grid name="events" class="form-labeled-button-rack"><text-notice>loading</text-notice></block-grid>
 
-                                    <slideshow-caption data-other-captions="[]"></slideshow-caption>
-                                    <slideshow-note>
-                                        <a href="/stogarobotics/gallery/">View full gallery</a>
-                                    </slideshow-note>
-                                </slideshow->
+                                    <h2>Award totals</h2>
+                                    <block-grid name="awards" class="form-labeled-button-rack"><text-notice>loading</text-notice></block-grid>
+                                </form>
+                                <p>Data fetched from <a href="https://vexdb.io/">VexDB</a>. Counts may become inaccurate should there arise unexpected changes to robotevents.com data.</p>
                             </chunk-text>
                         </section>
                     </content-chunks>
 
-                    <aside>
-                        <team-roster>
-                            <team-member class="large">
-                                <team-member-image>
-                                    <img src="/stogarobotics/img/member/YashRaj.jpg" alt="Yash Raj’s icon" />
-                                </team-member-image>
-                                <team-member-descriptor>
-                                    <h3>Yash Raj</h3>
-                                    <div>Team captain</div>
-                                </team-member-descriptor>
-                            </team-member>
-                            <team-member>
-                                <team-member-image>
-                                    <img src="/stogarobotics/img/member/ArnavKaushik.png" alt="Arnav Kaushik’s icon" />
-                                </team-member-image>
-                                <team-member-descriptor>
-                                    <h3>Arnav Kaushik</h3>
-                                    <div>Programmer, designer</div>
-                                </team-member-descriptor>
-                            </team-member>
-                            <team-member>
-                                <team-member-image>
-                                    <img src="/stogarobotics/img/member/AbhiPandey.jpg" alt="Abhimaneu Pandey’s icon" />
-                                </team-member-image>
-                                <team-member-descriptor>
-                                    <h3>Abhimaneu Pandey</h3>
-                                    <div>Designer, builder, documenter</div>
-                                </team-member-descriptor>
-                            </team-member>
-                            <team-member>
-                                <team-member-image>
-                                    <img src="/stogarobotics/img/member/AdityaSharma.jpg" alt="Aditya Sharma’s icon" />
-                                </team-member-image>
-                                <team-member-descriptor>
-                                    <h3>Aditya Sharma</h3>
-                                    <div></div>
-                                </team-member-descriptor>
-                            </team-member>
-                            <team-member>
-                                <team-member-image>
-                                    <img src="/stogarobotics/img/member/special/default.png" alt="Aditya Raj’s icon" />
-                                </team-member-image>
-                                <team-member-descriptor>
-                                    <h3>Aditya Raj</h3>
-                                    <div></div>
-                                </team-member-descriptor>
-                            </team-member>
-                            <team-member>
-                                <team-member-image>
-                                    <img src="/stogarobotics/img/member/special/default.png" alt="Jason Furda’s icon" />
-                                </team-member-image>
-                                <team-member-descriptor>
-                                    <h3>Jason Furda</h3>
-                                    <div></div>
-                                </team-member-descriptor>
-                            </team-member>
-                            <team-member>
-                                <team-member-image>
-                                    <img src="/stogarobotics/img/member/special/default.png" alt="Tamara Rushby’s icon" />
-                                </team-member-image>
-                                <team-member-descriptor>
-                                    <h3>Tamara Rushby</h3>
-                                    <div></div>
-                                </team-member-descriptor>
-                            </team-member>
-                        </team-roster>
+                    <aside class="js-required">
+                        <instance-display><text-notice>Select a statistic to view its instances…</text-notice></instance-display>
                     </aside>
                 </primary-content>
+
+                <script src="/stogarobotics/js/prestige.js" type="module" defer></script>
             </central-content>
 
             <!-- footer -->
