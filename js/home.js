@@ -6,8 +6,17 @@ import "./ce.js";
 import {qs, createElement} from "./util.js";
 import {vexdbGetForAllTeams} from "./app-util.js";
 
+const prestigeChunkOther = qs(".content-chunk[name='prestige'] > chunk-other");
+
 (async () => {
-    const awardsLists = await vexdbGetForAllTeams("awards");
+    let awardsLists;
+    try {
+        awardsLists = await vexdbGetForAllTeams("awards");
+    } catch (error) {
+        prestigeChunkOther.remove();
+        
+        throw error;
+    }
 
     const awards = awardsLists.flat().sort((a, b) => a.order - b.order);
 
@@ -43,7 +52,7 @@ import {vexdbGetForAllTeams} from "./app-util.js";
                 }),
             ],
 
-            parent: qs(".content-chunk[name='prestige'] > chunk-other > bar-list"),
+            parent: qs("bar-list", prestigeChunkOther),
         });
     }
 })();

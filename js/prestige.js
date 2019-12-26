@@ -30,6 +30,19 @@ const scopeNames = [
     "",
 ];
 
+function getLoadingFailMessage(nLoadingFails) {
+    switch (true) {
+        case nLoadingFails === 0:
+            return "";
+
+        case nLoadingFails === 1:
+            return " again";
+
+        default:
+            return ` ${nLoadingFails} times`;
+    }
+}
+
 class EventScopeType extends TypeCounter {
     constructor(resultObject) {
         super();
@@ -78,44 +91,51 @@ class EventScopeType extends TypeCounter {
                 this);
     }
 
-    static async buildInstancesDisplay(instances) {
+    static async buildInstancesDisplay(instances, sublist) {
         instances = instances.sort((a, b) => new Date(b.start) - new Date(a.start));
-        for (const instance of instances) {
+        for (let i = 0; i < instances.length; i++) {
+            const instance = instances[i];
+            const instanceDetailsContainer = sublist.children[i];
+
             const date = new Date(instance.start);
 
-            instanceDisplay.appendChild(createElement("instance-details", {
+            declade(instanceDetailsContainer).classList.remove("placeholder");
+
+            createElement("instance-name", {
                 children: [
-                    createElement("div", {
-                        children: [
-                            createElement("a", {
-                                properties: {
-                                    href: `https://robotevents.com/${instance.sku}.html`,
-                                    target: "_blank",
-                                },
-                                textContent: trimEventName(instance.name, 50),
-                            }),
-                        ],
-                    }),
-
-                    createElement("div", {
-                        children: [
-                            document.createTextNode(" ("),
-                            createElement("a", {
-                                properties: {
-                                    href: `https://vexdb.io/events/view/${instance.sku}`,
-                                    target: "_blank",
-                                },
-                                textContent: "VexDB",
-                            }),
-                            document.createTextNode(")"),
-                        ],
-                    }),
-
-                    createElement("div", {
-                        textContent: dateString(date),
+                    createElement("a", {
+                        properties: {
+                            href: `https://robotevents.com/${instance.sku}.html`,
+                            target: "_blank",
+                        },
+                        textContent: instance.name,
                     }),
                 ],
-            }));
+
+                parent: instanceDetailsContainer,
+            });
+
+            createElement("div", {
+                children: [
+                    document.createTextNode(" ("),
+                    createElement("a", {
+                        properties: {
+                            href: `https://vexdb.io/events/view/${instance.sku}`,
+                            target: "_blank",
+                        },
+                        textContent: "VexDB",
+                    }),
+                    document.createTextNode(")"),
+                ],
+
+                parent: instanceDetailsContainer,
+            });
+
+            createElement("div", {
+                textContent: dateString(date),
+
+                parent: instanceDetailsContainer,
+            });
         }
     }
 
@@ -128,6 +148,7 @@ class EventScopeType extends TypeCounter {
     }
 }
 EventScopeType.records = [];
+EventScopeType.nLoadingFails = 0;
 EventScopeType.grid = qs("block-grid[name='events']");
 EventScopeType.endpointName = "events";
 
@@ -167,46 +188,55 @@ class AwardType extends TypeCounter {
                 this);
     }
 
-    static async buildInstancesDisplay(instances) {
-        for (const instance of instances) {
-            const event = await findEvent(instance.sku);
+    static async buildInstancesDisplay(instances, sublist) {
+        for (let i = 0; i < instances.length; i++) {
+            const instance = instances[i];
+            const instanceDetailsContainer = sublist.children[i];
 
-            const date = event ? new Date(event.start) : NaN;
-            
-            instanceDisplay.appendChild(createElement("instance-details", {
-                children: [
-                    createElement("div", {
-                        children: [
-                            document.createTextNode(`${instance.name} at `),
-                            createElement("a", {
-                                properties: {
-                                    href: `https://robotevents.com/${instance.sku}.html`,
-                                    target: "_blank",
-                                },
-                                textContent: trimEventName(event ? event.name : instance.sku, 30),
-                            }),
-                        ],
-                    }),
-
-                    createElement("div", {
-                        children: [
-                            document.createTextNode(" ("),
-                            createElement("a", {
-                                properties: {
-                                    href: `https://vexdb.io/events/view/${instance.sku}`,
-                                    target: "_blank",
-                                },
-                                textContent: "VexDB",
-                            }),
-                            document.createTextNode(")"),
-                        ],
-                    }),
-
-                    createElement("div", {
-                        textContent: event ? dateString(date) : "date unknown",
-                    }),
-                ],
-            }));
+            // No await to let the other instances load concurrently
+            (async () => {
+                const event = await findEvent(instance.sku);
+                const date = event ? new Date(event.start) : NaN;
+    
+                declade(instanceDetailsContainer).classList.remove("placeholder");
+                
+                createElement("instance-name", {
+                    children: [
+                        document.createTextNode(`${instance.name} at `),
+                        createElement("a", {
+                            properties: {
+                                href: `https://robotevents.com/${instance.sku}.html`,
+                                target: "_blank",
+                            },
+                            textContent: event ? event.name : instance.sku,
+                        }),
+                    ],
+    
+                    parent: instanceDetailsContainer,
+                });
+    
+                createElement("div", {
+                    children: [
+                        document.createTextNode(" ("),
+                        createElement("a", {
+                            properties: {
+                                href: `https://vexdb.io/events/view/${instance.sku}`,
+                                target: "_blank",
+                            },
+                            textContent: "VexDB",
+                        }),
+                        document.createTextNode(")"),
+                    ],
+    
+                    parent: instanceDetailsContainer,
+                });
+    
+                createElement("div", {
+                    textContent: event ? dateString(date) : "date unknown",
+    
+                    parent: instanceDetailsContainer,
+                });
+            })();
         }
     }
 
@@ -219,16 +249,9 @@ class AwardType extends TypeCounter {
     }
 }
 AwardType.records = [];
+AwardType.nLoadingFails = 0;
 AwardType.grid = qs("block-grid[name='awards']");
 AwardType.endpointName = "awards";
-
-function trimEventName(name, maxNameLength=40) {
-    name = name.trim();
-    if (name.length > maxNameLength) {
-        return name.substring(0, maxNameLength) + "…";
-    }
-    return name;
-}
 
 async function findEvent(sku) {
     for (const instance of EventScopeType.records.map(record => record.instances).flat()) {
@@ -241,21 +264,58 @@ async function findEvent(sku) {
 }
 
 function dateString(date) {
-    return `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, "0")}-${(date.getUTCDay() + 1).toString().padStart(2, "0")}`;
+    return `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, "0")}-${date.getUTCDate().toString().padStart(2, "0")}`;
 }
+
+const infoDivs = new Map(); // maps Counters to elements that display errors, loading, etc.
 
 // Run a counter
 async function count(Counter) {
-    let queryResponse;
+    // Get the info div for this Counter, or create one if it does not exist
+    let infoDiv = infoDivs.get(Counter);
+    if (!infoDiv) {
+        infoDiv = createElement("div");
+        infoDivs.set(Counter, infoDiv);
+
+        Counter.grid.parentElement.insertBefore(infoDiv, Counter.grid);
+    }
+
+    // Show a loading message while querying VexDB
+    declade(infoDiv).appendChild(createNotice("loading"));
     
+    let queryResponse;
     try {
         // Query VexDB
         queryResponse = (await vexdbGetForAllTeams(Counter.endpointName, {}, true)).flat();
     } catch (error) {
         // Show an error message if failed
-        declade(Counter.grid).appendChild(createNotice("loading failed"));
+        declade(infoDiv).appendChild(createNotice(`loading failed${getLoadingFailMessage(Counter.nLoadingFails)}`));
+
+        // For VexDB error code 0 (internal server error), show an additional message
+        if (error.error_code === 0) {
+            infoDiv.appendChild(createElement("p", {
+                textContent: "VexDB is currently unavailable. Try again later.",
+            }));
+        }
+
+        // Add a retry button
+        createElement("span", {
+            textContent: "Retry",
+            classes: ["button"],
+            parent: infoDiv,
+        }).addEventListener("click", () => {
+            count(Counter);
+        });
+
+        // Increment number of loading fails for this counter
+        Counter.nLoadingFails++;
+
         throw error;
     }
+
+    // Remove the info div if successful
+    infoDiv.remove();
+    infoDivs.delete(Counter);
 
     // Iterate through the result objects
     for (const resultObject of queryResponse) {
@@ -276,12 +336,13 @@ async function count(Counter) {
         record.count++;
     }
 
+    // Show the list of categories
     Counter.updateDisplay();
 }
 
-let nBlock = 0;
+let nBlock = 0; // numerical id, used to match up each block with its <input>
 // Create a box displaying a number with a label
-function createBlock(number, label, parent, emphasize=false, counter) {
+function createBlock(number, label, parent, emphasize=false, Counter) {
     const classes = ["button", "item"];
 
     if (emphasize) {
@@ -300,7 +361,7 @@ function createBlock(number, label, parent, emphasize=false, counter) {
         parent,
     });
     
-    inputsToRecords.set(input, counter);
+    inputsToRecords.set(input, Counter);
 
     createElement("label", {
         attributes: [
@@ -340,13 +401,14 @@ function countCategoryInstancesByTeam(instances) {
 }
 
 async function displayCategoryInstances(instances, Counter) {
+    // Sort the instances into teams
     const instancesByTeam = countCategoryInstancesByTeam(instances);
-    
-    const entries = Object.entries(instancesByTeam).sort((a, b) => a[0].localeCompare(b[0]));
+    const instancesByTeamEntries = Object.entries(instancesByTeam).sort((a, b) => a[0].localeCompare(b[0]));
 
     declade(instanceDisplay);
+    for (const [teamNumber, instances] of instancesByTeamEntries) {
+        // Create a section for each team
 
-    for (const [teamNumber, instances] of entries) {
         createElement("h3", {
             children: [
                 createElement("a", {
@@ -357,21 +419,51 @@ async function displayCategoryInstances(instances, Counter) {
                     textContent: teamNumber,
                 }),
             ],
+
             parent: instanceDisplay,
         });
 
-        await Counter.buildInstancesDisplay(instances);
+        createElement("instance-subcounter", {
+            textContent: instances.length,
+
+            parent: instanceDisplay,
+        });
+
+        const sublist = createElement("instance-sublist", {
+            parent: instanceDisplay,
+        });
+
+        // Since the number of instances to display is known, placeholder elements can be used to fill the space and avoid page jumping
+        for (let i = 0; i < instances.length; i++) {
+            createElement("instance-details", {
+                children: [
+                    createNotice("loading"),
+                ],
+
+                classes: ["placeholder"],
+
+                parent: sublist,
+            });
+        }
+
+        // This shouldn't block the function execution
+        Counter.buildInstancesDisplay(instances, sublist);
     }
+}
+
+function instanceDisplayInit() {
+    declade(instanceDisplay).appendChild(createNotice("Select a statistic to view its instances…"));
 }
 
 // init
 
 const inputsToRecords = new WeakMap();
-
 qs("form.stat-options").addEventListener("change", event => {
     const record = inputsToRecords.get(qs("input:checked", event.currentTarget));
 
-    if (record instanceof TypeCounter) {
+    if (!record) {
+        instanceDisplayInit();
+    } else if (record instanceof TypeCounter) {
         const instances = record.instances;
         displayCategoryInstances(instances, record.constructor);
     } else {
@@ -379,6 +471,8 @@ qs("form.stat-options").addEventListener("change", event => {
         displayCategoryInstances(instances, record);
     }
 });
+
+instanceDisplayInit();
 
 for (const Counter of [EventScopeType, AwardType]) {
     count(Counter);

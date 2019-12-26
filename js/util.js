@@ -1,5 +1,5 @@
 /**
- * @file Solely used to define a collection of utility methods to facilitate codewriting in any other file. This script should have 0 dependencies.
+ * @file Solely used to define a collection of utility methods to facilitate codewriting in any other file. This script should have 0 imports.
  */
 
 export const qs = (selector, context=document) => context.querySelector(selector);

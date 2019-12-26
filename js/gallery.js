@@ -88,8 +88,7 @@ async function fetchAndDisplayImages(options) {
 
     // Show an error message if querying failed
     if (!response.success) {
-        // reimplement this
-        qs("p").textContent = "Image fetching failed. Try reloading?";
+        addNotice("image fetching failed; try reloading");
 
         console.warn("Image fetching failed:", response.errorMessage);
         return;
@@ -112,14 +111,14 @@ async function fetchAndDisplayImages(options) {
             children: [
                 createElement("a", {
                     properties: {
-                        "href": image.image_url,
+                        "href": `../img/gallery/${image.image_url}`,
                         "target": "_blank",
                     },
 
                     children: [  
                         createElement(Image, {
                             properties: {
-                                "src": image.image_url,
+                                "src": `./thumb/${image.image_url}`,
                                 "alt": image.caption,
                             },
                         }),
