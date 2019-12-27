@@ -301,6 +301,8 @@ navigation-button,
 .form-labeled-button-rack > label,
 .button,
 input[type="submit"] {
+    padding: .2em .4em;
+    
     text-align: center;
     color: var(--color-garnet-3);
     background: linear-gradient(var(--color-bg-end), var(--color-bg-end)) no-repeat center,
@@ -375,6 +377,12 @@ block-grid {
     gap: 1em;
 }
 
+block-grid > :not(.item) {
+    grid-column: 1 / -1;
+    width: auto;
+    height: auto;
+}
+
 block-grid > .item {
     padding: .5em;
     display: flex;
@@ -384,7 +392,7 @@ block-grid > .item {
     text-align: center;
     box-shadow: var(--box-shadow-block-item);
 
-    --box-shadow-block-item: 0 3px 5px var(--color-garnet-1-7f);
+    --box-shadow-block-item: 0 2px 5px var(--color-garnet-1-7f);
 }
 block-grid > .item.button {
     --color-bg-start: var(--color-chunk-tone-1);
@@ -436,7 +444,6 @@ gallery-filter-rows > form {
 }
 
 gallery-filter-rows > form > * {
-    padding: .2em .4em;
     margin-left: 1em;
 
     font-weight: 700;
@@ -551,22 +558,58 @@ instance-display {
     max-height: 100vh;
     top: 0;
     padding: 2em 0;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 0;
     overflow-y: auto;
 
     font-size: .8em;
 }
 
+instance-display > instance-subcounter::before {
+    content: "•";
+    margin: 0 .8em;
+}
+
+instance-display > instance-subcounter {
+    display: flex;
+    align-items: flex-end;
+
+    font-size: 1.25em;
+    font-weight: 900;
+}
+
+instance-display > instance-sublist,
+instance-display > text-notice {
+    grid-column: 1 / -1;
+}
+
+instance-sublist {
+    display: flex;
+    flex-direction: column;
+}
+
 instance-details {
-    margin: 2px 0;
-    padding: 8px;
+    padding: 4px 8px;
+    margin-bottom: 4px;
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 2px;
+    grid-template-columns: 1fr auto auto;
+    gap: 2px 8px;
 
     border-radius: 8px;
     background: var(--color-chunk-tone-2);
+}
+
+instance-details.placeholder {
+    background: var(--color-chunk-tone-3);
+}
+
+instance-details > instance-name {
+    overflow: hidden;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 900;
 }
 
 /* Slideshows */
@@ -949,7 +992,7 @@ body.prestigepage main > central-content > primary-content {
     height: 100%;
 }
 
-/* `flex-grow` on these usually should have no effect (since they use the entire space), unless one is missing */
+/* `flex-grow` on these usually should have no effect (since they use the entire space), unless either <chunk-text> or <chunk-other> is missing */
 .content-chunk > chunk-text {
     flex: 100% 1 3;
     display: flex;
@@ -960,6 +1003,9 @@ body.prestigepage main > central-content > primary-content {
 .content-chunk > chunk-other {
     flex: 45% 1 1;
     margin-left: 2em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 .content-chunk > chunk-other:empty {
     flex-basis: 0;
@@ -978,26 +1024,26 @@ content-chunks > .content-chunk:nth-child(even) {
     --color-chunk-tone-2: var(--color-chunk-tone-init-1);
 }
 
-content-chunks > .content-chunk:nth-child(even) > chunk-other {
+.content-chunk:nth-child(even) > chunk-other {
     margin-left: 0;
     margin-right: 2em;
 }
 
-content-chunks > .content-chunk:nth-child(even) > chunk-other:empty {
+.content-chunk:nth-child(even) > chunk-other:empty {
     margin-right: 0;
 }
 
-main > central-content > primary-content > content-chunks > .content-chunk > chunk-other {
-    grid-column: 1;
-    grid-row: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+chunk-text > slideshow- {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-main > central-content > primary-content > aside {
+primary-content > aside {
     grid-column: 2;
     grid-row: 1;
+}
+aside {
     padding: var(--bar-padding);
     /* padding-right: var(--bar-padding-right); */
 
@@ -1176,6 +1222,10 @@ footer.content-chunk {
 
 footer h2 {
     color: var(--color-white-1);
+}
+
+footer.content-chunk > chunk-other {
+    justify-content: unset;
 }
 
 contact-container {

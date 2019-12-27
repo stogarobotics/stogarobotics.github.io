@@ -1,5 +1,5 @@
 /**
- * @file Defines utility methods that pertain to this project specifically. This script should only have `util.js` as a dependency.
+ * @file Defines utility methods that pertain to this project specifically. This script should only have `util.js` as an import.
  */
 
 import {createElement, xhrGet} from "./util.js";
@@ -12,7 +12,14 @@ export const teamNumbers = new Array(6).fill().map((value, i) => `6121${String.f
  * @param {object} [options] Search parameters to be passed through the URL.
  */
 export async function vexdbGet(endpointNameGet, options={}) {
-    return await xhrGet(`https://api.vexdb.io/v1/get_${endpointNameGet}?${new URLSearchParams(options)}`);
+    const response = await xhrGet(`https://api.vexdb.io/v1/get_${endpointNameGet}?${new URLSearchParams(options)}`);
+
+    // If the response gave back an error, throw the object
+    if (response.status === 0) {
+        throw response;
+    }
+
+    return response;
 }
 
 /**
@@ -22,20 +29,19 @@ export async function vexdbGet(endpointNameGet, options={}) {
  * @param {boolean} [attachTeamNumber] Whether to add the team number as a property to the object of each request.
  */
 export async function vexdbGetForAllTeams(endpointNameGet, options={}, attachTeamNumber=false) {
-    const lists = [];
     const promises = teamNumbers.map(async (teamNumber, i) => {
-        lists[i] = (await vexdbGet(endpointNameGet, Object.assign({team: teamNumber}, options))).result;
+        const list = (await vexdbGet(endpointNameGet, Object.assign({team: teamNumber}, options))).result;
 
         if (attachTeamNumber) {
-            for (const resultObject of lists[i]) {
+            for (const resultObject of list) {
                 resultObject.team = teamNumber;
             }
         }
+
+        return list;
     });
 
-    await Promise.all(promises);
-
-    return lists;
+    return await Promise.all(promises);
 }
 
 export function createNotice(text) {

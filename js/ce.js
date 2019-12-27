@@ -51,6 +51,11 @@ import {Slideshow} from "./ce/Slideshow.js";
         "paginator-counter",        // Displays the current page number of a paginator
         "paginator-number-max",     // Displays the maximum page number of a paginator
         "navigation-button",        // Serves as a button used to move along in a sequence, eg update a page number
+        "instance-display",
+        "instance-subcounter",
+        "instance-sublist",
+        "instance-details",
+        "instance-name",
         "big-number",
         "button-grid",              // Organizes buttons into a grid
         "block-grid",

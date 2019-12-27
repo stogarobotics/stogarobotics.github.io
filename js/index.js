@@ -16,4 +16,22 @@ for (const element of qsa(".js-required")) {
     element.classList.remove("js-required");
 }
 
+
+// let headerRect;
+// const headerMedia = qs("header-media");
+
+// setHeaderRect();
+// addEventListener("scroll", () => {
+//     if (scrollY > headerRect.bottom) return;
+
+//     headerMedia.style.transform = `translateY(${scrollY / 2}px)`;
+// });
+// addEventListener("resize", () => {
+//     setHeaderRect();
+// });
+
+// function setHeaderRect() {
+//     headerRect = qs("header").getBoundingClientRect();
+// }
+
 qs("footer copyright-year").textContent = new Date().getUTCFullYear();
