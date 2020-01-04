@@ -156,3 +156,17 @@ export function randfloat(min=0, max=1) {
 export function randint(min=0, max=1) {
     return Math.floor(randfloat(min, max + 1));
 }
+
+export class StoppablePromise extends Promise {
+    constructor(callback) {
+        let controls;
+
+        super((resolve, reject) => {
+            controls = {resolve, reject};
+
+            callback(resolve, reject);
+        });
+
+        Object.assign(this, controls);
+    }
+}

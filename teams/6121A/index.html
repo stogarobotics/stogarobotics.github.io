@@ -14,7 +14,7 @@
 
         <link href="/stogarobotics/img/logo/cgear.png" rel="icon" />
 
-        <script src="/stogarobotics/js/index.js" type="module" defer></script>
+        <script src="/stogarobotics/js/index.js" type="module"></script>
 
         <link href="/stogarobotics/css/index.css" rel="stylesheet" />
         
@@ -51,9 +51,17 @@
                             <chunk-text>
                                 <p>We are 6121A. We are a group of determined and hardworking engineers who aim to design, build, and program the best robots we can. We strive to bring home the trophy at every level of competition and always aim to make Stoga proud!</p>
 
-                                <h2>Performance</h2>
-                                <bar-list class="js-required"></bar-list>
-                                <p>View statistics and performances on <a href="https://www.robotevents.com/teams/VRC/6121A" target="_blank">Robot Events</a> or <a href="https://vexdb.io/teams/view/6121A" target="_blank">VexDB</a></p>
+                                <h2>Statistics</h2>
+                                <div name="team-statistics" class="js-required">
+                                    <team-stat-list></team-stat-list>
+                                    <p>See instances and more specific counts at the <a href="/stogarobotics/prestige/">prestige</a> page.</p>
+                                </div>
+                                <p>View additional statistics on <a href="https://www.robotevents.com/teams/VRC/6121A" target="_blank">Robot Events</a> or <a href="https://vexdb.io/teams/view/6121A" target="_blank">VexDB</a>.</p>
+
+                                <h2>Upcoming events</h2>
+                                <instance-list name="upcoming-events" class="js-required"></instance-list>
+                                <noscript><p>JavaScript is required to view upcoming events.</p></noscript>
+                                <p class="js-required">Past event history is available on the <a href="/stogarobotics/prestige/">prestige</a> page.</p>
 
                                 <h2>Gallery</h2>
                                 <slideshow->
@@ -61,7 +69,7 @@
                                         <img src="/stogarobotics/img/gallery/DSC_0105.jpg" alt="Team 6121A gallery image" />
                                     </slideshow-media>
 
-                                    <slideshow-caption data-other-captions="[]"></slideshow-caption>
+                                    <slideshow-caption data-other-captions="[]">Brainstorming strategies between CRT teams.</slideshow-caption>
                                     <slideshow-note>
                                         <a href="/stogarobotics/gallery/">View full gallery</a>
                                     </slideshow-note>
@@ -128,7 +136,7 @@
                             </team-member>
                             <team-member>
                                 <team-member-image>
-                                    <img src="/stogarobotics/img/member/special/default.png" alt="Tamara Rushby’s icon" />
+                                    <img src="/stogarobotics/img/member/TamaraRushby.png" alt="Tamara Rushby’s icon" />
                                 </team-member-image>
                                 <team-member-descriptor>
                                     <h3>Tamara Rushby</h3>
@@ -138,6 +146,10 @@
                         </team-roster>
                     </aside>
                 </primary-content>
+
+                <input name="team-number" type="hidden" value="6121A" />
+
+                <script src="/stogarobotics/js/teams.js" type="module"></script>
             </central-content>
 
             <!-- footer -->
