@@ -4,6 +4,7 @@
 
 import {qsa} from "./util.js";
 import {Slideshow} from "./ce/Slideshow.js";
+import {LoadingSign} from "./ce/LoadingSign.js";
 
 (() => {
     // Edge does not have custom element support; use a fallback that maintains functionality
@@ -16,7 +17,7 @@ import {Slideshow} from "./ce/Slideshow.js";
                 // Iterate through each element with the given tag name
                 for (const element of qsa(tagName)) {
                     // Copy class methods over
-                    element.__proto__ = fn.prototype;
+                    Object.setPrototypeOf(element, fn.prototype);
 
                     // Call `connectedCallback` if present
                     if (typeof fn.prototype.connectedCallback === "function") {
@@ -40,7 +41,7 @@ import {Slideshow} from "./ce/Slideshow.js";
         "chunk-decal",              // Displays a subtle background image for a content chunk
         "chunk-text",               // Holds the main portion of content in a content chunk
         "chunk-other",              // Holds the secondary portion of content in a content chunk
-        "gallery-filter-rows",      // Contains buttons that control a gallery filter
+        "filter-rows",      // Contains buttons that control a gallery filter
         "gallery-grid",             // Organizes the images in a gallery
         "gallery-item",             // Contains one image in a gallery
         "slideshow-media",          // Contains one image in a slideshow
@@ -53,14 +54,15 @@ import {Slideshow} from "./ce/Slideshow.js";
         "navigation-button",        // Serves as a button used to move along in a sequence, eg update a page number
         "instance-display",
         "instance-subcounter",
-        "instance-sublist",
+        "instance-list",
         "instance-details",
         "instance-name",
-        "big-number",
+        "big-number",               // Emphasizes a single number, usually for a statistic
         "button-grid",              // Organizes buttons into a grid
-        "block-grid",
+        "block-grid",               
         "bar-list",                 // Contains multiple <bar-item>s
         "bar-item",                 // Contains a key-value bar with a header and short explanatory text
+        "team-stat-list",           // Creates a grid to organize team statistics into horizontal bars
         "team-roster",              // Lists all the members of a team (Recommended only as a direct child of [primary-content > aside])
         "team-member",              // Contains information about one member of a team (Recommended only as a direct child of [team-roster])
         "team-member-image",        // Displays the image of a team member (Recommended only as a direct child of [team-member])
@@ -78,6 +80,7 @@ import {Slideshow} from "./ce/Slideshow.js";
         customElements.define(tagName, class extends HTMLElement {});
     }
 
-    // Slideshows
+    // Other
     customElements.define("slideshow-", Slideshow);
+    customElements.define("loading-sign", LoadingSign);
 })();

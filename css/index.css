@@ -159,6 +159,8 @@ h1 {
 }
 
 h2 {
+    margin: .3em 0;
+
     font-size: 2.5em;
     color: var(--color-garnet-1);
 }
@@ -183,6 +185,10 @@ p {
     margin: .5em 0 .5em 2.5em;
     
     line-height: 2.25;
+}
+
+p.foot {
+    font-style: italic;
 }
 
 a {
@@ -213,6 +219,10 @@ floating-anchor {
     display: none !important; /* !important is used here because there is no expectation that another display rule should supercede this one. */
 }
 
+loading-sign.resolved {
+    display: none;
+}
+
 
 /* Emphasis */
 
@@ -221,9 +231,12 @@ big-number {
     overflow: hidden;
     text-overflow: ellipsis;
 
-    font-size: 4em;
+    font-size: var(--big-number-font-size);
     letter-spacing: -.05em;
+    line-height: 1;
     color: var(--color-garnet-2);
+
+    --big-number-font-size: 4em;
 }
 
 text-notice {
@@ -327,6 +340,7 @@ block-grid > .item.button:hover > * {
 
 /* Form rows */
 
+/* This class is used for forms that utilize hidden inputs next to labels that appear as buttons. This way, click listeners are handled automatically */
 .form-labeled-button-rack {
     --transition-box-shadow: box-shadow .2s var(--ease-out-circle);
 }
@@ -377,12 +391,6 @@ block-grid {
     gap: 1em;
 }
 
-block-grid > :not(.item) {
-    grid-column: 1 / -1;
-    width: auto;
-    height: auto;
-}
-
 block-grid > .item {
     padding: .5em;
     display: flex;
@@ -430,26 +438,26 @@ bar-item > * {
 
 /* Gallery */
 
-gallery-filter-rows {
+filter-rows {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 1em 2em;
     margin-top: 1em;
 }
 
-gallery-filter-rows > form {
+filter-rows > form {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
 }
 
-gallery-filter-rows > form > * {
+filter-rows > form > * {
     margin-left: 1em;
 
     font-weight: 700;
 }
 
-gallery-filter-rows > form > label {
+filter-rows > form > label {
     margin-bottom: .6em;
 }
 
@@ -579,21 +587,22 @@ instance-display > instance-subcounter {
     font-weight: 900;
 }
 
-instance-display > instance-sublist,
+instance-display > instance-list,
 instance-display > text-notice {
     grid-column: 1 / -1;
 }
 
-instance-sublist {
+instance-list {
     display: flex;
     flex-direction: column;
 }
 
 instance-details {
     padding: 4px 8px;
-    margin-bottom: 4px;
+    margin-bottom: .3em;
     display: grid;
     grid-template-columns: 1fr auto auto;
+    grid-auto-rows: auto;
     gap: 2px 8px;
 
     border-radius: 8px;
@@ -610,6 +619,16 @@ instance-details > instance-name {
     white-space: nowrap;
     text-overflow: ellipsis;
     font-weight: 900;
+}
+
+instance-details > :nth-child(n + 2) {
+    font-size: .8em;
+    display: flex;
+    align-items: flex-end;
+}
+
+instance-details > :nth-child(n + 4) {
+    grid-column: 1 / -1;
 }
 
 /* Slideshows */
@@ -730,10 +749,29 @@ slideshow- > slideshow-media > a:hover img {
     filter: brightness(1.25) contrast(1.25);
 }
 
-navigation-button.disabled {
+.disabled {
     pointer-events: none;
 
     opacity: .3;
+}
+
+/* Team statistic lists */
+
+team-stat-list {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 1em;
+}
+
+team-stat-list > * {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+team-stat-list > big-number {
+    font-size: calc(.8 * var(--big-number-font-size));
+    text-align: right;
 }
 
 /* Team member lists */
@@ -1495,7 +1533,7 @@ svg use.logo-gear-rotate {
     }
 
     .content-chunk > chunk-other,
-    content-chunks > .content-chunk:nth-child(even) > chunk-other {
+    .content-chunk:nth-child(even) > chunk-other {
         flex: 100% 0 1;
         margin-left: 0;
         margin-right: 0;

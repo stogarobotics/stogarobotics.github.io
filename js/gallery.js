@@ -18,8 +18,9 @@ const nResultsPerPage = 8;
 let nTotalMatchingEntries = 0;
 
 let nPage = 0;
-const nMaxPage = () => Math.floor(nTotalMatchingEntries / nResultsPerPage);
+const nMaxPage = () => Math.floor((nTotalMatchingEntries - 1) / nResultsPerPage);
 
+// Gets the fetch options and loads and displays the images
 function query() {
     updateCurrentPageNumber();
     
@@ -68,6 +69,8 @@ const requestImages = (() => {
         const response = {
             success: true,
         };
+
+        options.n_offset = Math.max(options.n_offset, 0);
         
         const matches = queryResult.result.filter(image => {
             return !options.teams[0] || options.teams.includes(image.team_number);
@@ -148,7 +151,7 @@ function updateCurrentPageNumber(n=nPage) {
     nPage = Math.min(nMaxPage(), Math.max(0, n)) || 0;
     pageCounterInput.value = nPage + 1;
 
-    if (nPage === 0) {
+    if (nPage <= 0) {
         arrowLeft.classList.add("disabled");
         arrowLeftEnd.classList.add("disabled");
     } else {
@@ -156,7 +159,7 @@ function updateCurrentPageNumber(n=nPage) {
         arrowLeftEnd.classList.remove("disabled");
     }
 
-    if (nPage === nMaxPage()) {
+    if (nPage >= nMaxPage()) {
         arrowRight.classList.add("disabled");
         arrowRightEnd.classList.add("disabled");
     } else {
@@ -169,7 +172,7 @@ function updateMaxPageNumber() {
     pageCounterMax.textContent = nMaxPage() + 1;
 }
 
-qs("gallery-filter-rows").addEventListener("change", () => {
+qs("filter-rows").addEventListener("change", () => {
     updateCurrentPageNumber(0);
     query(); // Filter settings are handled in `query`
 });
