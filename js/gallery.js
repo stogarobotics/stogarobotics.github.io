@@ -2,7 +2,7 @@
  * @file Script that runs on the gallery page. Controls querying and parsing of image info gathered from the API.
  */
 
-import {qs, qsa, declade, createElement} from "./util.js";
+import {qs, qsa, declade, createElement, xhrGet} from "./util.js";
 
 const arrowLeftEnd = qs("paginator- navigation-button.arrow-left-end");
 const arrowLeft = qs("paginator- navigation-button.arrow-left");
@@ -40,15 +40,8 @@ function query() {
 }
 
 // version used with backend on
-/*function requestImages(options) {
-    return new Promise(resolve => {
-        const req = new XMLHttpRequest();
-        req.addEventListener("load", () => {
-            resolve(JSON.parse(req.responseText));
-        });
-        req.open("GET", `./api/images?${new URLSearchParams(options)}`);
-        req.send();
-    });
+/*async function requestImages(options) {
+    return JSON.parse(await xhrGet(`./api/images?${new URLSearchParams(options)}`));
 }*/
 // version used on static page
 const requestImages = (() => {
@@ -56,14 +49,7 @@ const requestImages = (() => {
 
     return async options => {
         if (!queryResult) {
-            queryResult = await new Promise(resolve => {
-                const req = new XMLHttpRequest();
-                req.addEventListener("load", () => {
-                    resolve(JSON.parse(req.responseText));
-                });
-                req.open("GET", `./images.json`);
-                req.send();
-            });
+            queryResult = JSON.parse(await xhrGet("./images.json"));
         }
 
         const response = {
@@ -91,7 +77,8 @@ async function fetchAndDisplayImages(options) {
 
     // Show an error message if querying failed
     if (!response.success) {
-        addNotice("image fetching failed; try reloading");
+        declade(galleryGrid);
+        addNotice("image fetching failed; try reloading or using a different filter");
 
         console.warn("Image fetching failed:", response.errorMessage);
         return;
@@ -198,5 +185,7 @@ pageCounter.addEventListener("change", () => {
     updateCurrentPageNumber(parseInt(pageCounterInput.value) - 1);
     query();
 });
+
+updateMaxPageNumber(); // so that the max page is not empty at first
 
 query();

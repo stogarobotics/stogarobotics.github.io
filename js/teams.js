@@ -2,35 +2,43 @@
  * @file Script that runs on team pages. Loads the statistic summaries that appear on the page.
  */
 
-import {qs, declade, createElement} from "./util.js";
+import {qs, qsa, declade} from "./util.js";
 import {createNotice, vexdbGet, generateInstanceDetails, ResultObjectRecordCollector} from "./app-util.js";
 import {LoadingSign} from "./ce/LoadingSign.js";
 
 const teamNumber = qs("[name='team-number']").value;
-const targetStatistics = [
-    ["events", "events registered", "event registered"],
-    ["matches", "matches played", "match played"],
-    ["awards", "awards received", "award received"],
-];
 
 // Events, matches, award counts
 
 {
     const teamStatContainer = qs("[name='team-statistics']");
     const teamStatList = qs("team-stat-list");
+
+    const teamStatNumbers = qsa("big-number", teamStatList);
+    const teamStatLabels = qsa("h4", teamStatList);
+
+    const targetStatistics = [["events"], ["matches"], ["awards"]];
     
     const asyncCallback = () => {
-        declade(teamStatList);
-
         const targertStatisticsPromises = [];
         
-        for (const targetStatistic of targetStatistics) {
-            const statBar = buildStatisticBar("…", targetStatistic[1]);
+        for (let i = 0; i < targetStatistics.length; i++) {
+            const targetStatistic = targetStatistics[i];
+
+            // const statBar = buildStatisticBar("…", targetStatistic[1]);
         
+            teamStatNumbers[i].textContent = "…";
+
             targertStatisticsPromises.push((async () => {
                 const count = (await vexdbGet(targetStatistic[0], {team: teamNumber})).size;
-                statBar[0].textContent = count.toLocaleString();
-                statBar[1].textContent = targetStatistic[count !== 1 ? 1 : 2]; // Select the appropriate label (plural or singular)
+
+                teamStatNumbers[i].textContent = count.toLocaleString();
+
+                if (count === 1) {
+                    const label = teamStatLabels[i];
+                    // to deal with the events registered count having explanation text
+                    (label.firstElementChild || label).textContent = label.getAttribute("data-singular");
+                }
             })());
         }
 
@@ -42,19 +50,19 @@ const targetStatistics = [
 
     loadingSign.run();
 
-    function buildStatisticBar(value, label) {
-        return [
-            createElement("big-number", {
-                textContent: value.toLocaleString(),
-                parent: teamStatList,
-            }),
+    // function buildStatisticBar(value, label) {
+    //     return [
+    //         createElement("big-number", {
+    //             textContent: value.toLocaleString(),
+    //             parent: teamStatList,
+    //         }),
     
-            createElement("h4", {
-                textContent: label,
-                parent: teamStatList,
-            }),
-        ];
-    }
+    //         createElement("h4", {
+    //             textContent: label,
+    //             parent: teamStatList,
+    //         }),
+    //     ];
+    // }
 }
 
 // Upcoming event list
@@ -74,19 +82,24 @@ const targetStatistics = [
         upcomingEventCollector.count((await vexdbGet("events", {team: teamNumber})).result);
     };
 
-    const loadingSign = LoadingSign.create(asyncCallback);
-    list.parentElement.insertBefore(loadingSign, list);
+    const oncallbackresolve = () => {
+        const instances = upcomingEventCollector.instances();
 
-    loadingSign.run().then(() => {
-        const instances = upcomingEventCollector.instances(); console.log(instances);
         if (instances.length !== 0) {
+            // Show details for each found event
             for (const instance of instances.sort((a, b) => new Date(a.start) - new Date(b.start))) {
                 list.appendChild(generateInstanceDetails.eventDetailed(instance));
             }
         } else {
+            // Show a notice that no events were found
             list.parentElement.insertBefore(createNotice("no upcoming events found"), list);
         }
-    });
+    };
+
+    const loadingSign = LoadingSign.create(asyncCallback, oncallbackresolve);
+    list.parentElement.insertBefore(loadingSign, list);
+
+    loadingSign.run().then();
 }
 
 

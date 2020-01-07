@@ -28,7 +28,7 @@ export class VexdbApiError extends Error {
  * @param {object} [options] Search parameters to be passed through the URL.
  */
 export async function vexdbGet(endpointNameGet, options={}) {
-    const response = await xhrGet(`https://api.vexdb.io/v1/get_${endpointNameGet}?${new URLSearchParams(options)}`);
+    const response = JSON.parse(await xhrGet(`https://api.vexdb.io/v1/get_${endpointNameGet}?${new URLSearchParams(options)}`));
 
     // If the response gave back an error, throw the object
     if (response.status === 0) {
