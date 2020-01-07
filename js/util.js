@@ -37,9 +37,7 @@ export function createElement(tagNameOrConstructor="div", {
         element.classList.add(className);
     }
 
-    for (const [key, value] of Object.entries(properties)) {
-        element[key] = value;
-    }
+    Object.assign(element, properties);
 
     for (const [key, value, namespace] of attributes) {
         if (!namespace) {
@@ -119,7 +117,7 @@ export function xhrGet(url) {
     return new Promise((resolve, reject) => {
         const req = new XMLHttpRequest();
         req.addEventListener("load", () => {
-            resolve(JSON.parse(req.responseText));
+            resolve(req.responseText);
         });
 
         req.addEventListener("error", reject);

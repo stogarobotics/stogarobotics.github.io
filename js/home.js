@@ -4,9 +4,12 @@
 
 import "./ce.js";
 import {qs, createElement} from "./util.js";
-import {vexdbGetForAllTeams} from "./app-util.js";
+import {vexdbGet, vexdbGetForAllTeams, generateInstanceDetails, createNotice} from "./app-util.js";
 
 const prestigeChunkOther = qs(".content-chunk[name='prestige'] > chunk-other");
+const instanceList = qs("instance-list", prestigeChunkOther);
+
+const loadingNotice = instanceList.appendChild(createNotice("loading"));
 
 (async () => {
     let awardsLists;
@@ -24,35 +27,37 @@ const prestigeChunkOther = qs(".content-chunk[name='prestige'] > chunk-other");
         const award = awards[i];
         if (!award) break;
 
-        createElement("bar-item", {
+        const event = (await vexdbGet("events", {sku: award.sku})).result[0];
+
+        const instanceDetails = instanceList.appendChild(generateInstanceDetails.award(award, undefined, event));
+        instanceDetails.appendChild(createElement("div", {
             children: [
-                createElement("div", {
-                    children: [
-                        createElement("a", {
-                            properties: {
-                                href: `./teams/${award.team}/`,
-                            },
-                            textContent: award.team,
-                        }),
-                    ],
-                }),
-                createElement("h4", {
-                    textContent: award.name,
-                }),
-                createElement("div", {
-                    children: [
-                        createElement("a", {
-                            properties: {
-                                href: `https://vexdb.io/events/view/${award.sku}`,
-                                target: "_blank",
-                            },
-                            textContent: award.sku,
-                        }),
-                    ],
+                createElement("a", {
+                    textContent: award.team,
+
+                    properties: {
+                        "href": `./teams/${award.team}`,
+                    },
                 }),
             ],
-
-            parent: qs("bar-list", prestigeChunkOther),
-        });
+        }));
     }
+
+    prestigeChunkOther.appendChild(createElement("div", {
+        children: [
+            document.createTextNode("⁦… "),
+
+            createElement("a", {
+                textContent: "and more",
+                
+                properties: {
+                    "href": "./prestige/",
+                },
+            }),
+
+            document.createTextNode(" ⁦…"),
+        ],
+    }));
+
+    loadingNotice.remove();
 })();

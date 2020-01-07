@@ -5,11 +5,13 @@
  import {declade, createElement} from "../util.js";
 import {createNotice, VexdbApiError} from "../app-util.js";
 
-function instantiate(loadingSign, asyncCallback, callbackRerun=() => {}) {
+function instantiate(loadingSign, asyncCallback, oncallbackresolve=() => {}, oncallbackreject=() => {}, callbackRerun=() => {}) {
     loadingSign.resetElement();
     loadingSign.nFails = 0;
 
     loadingSign.asyncCallback = asyncCallback;
+    loadingSign.oncallbackresolve = oncallbackresolve;
+    loadingSign.oncallbackreject = oncallbackreject;
     loadingSign.callbackRerun = callbackRerun;
     return loadingSign;
 }
@@ -72,11 +74,15 @@ export class LoadingSign extends HTMLElement {
      * @returns {Promise} The promise from `this.asyncCallback`.
      */
     run() {
-        return this.asyncCallback().then(() => {
+        const promise = this.asyncCallback()
+        
+        promise.then(() => {
             this.resolved();
         }).catch(error => {
             this.rejected(error);
         });
+
+        return promise;
     }
 
     /**
@@ -96,6 +102,7 @@ export class LoadingSign extends HTMLElement {
      */
     resolved() {
         this.classList.add("resolved");
+        this.oncallbackresolve();
         return this;
     }
 
@@ -129,6 +136,8 @@ export class LoadingSign extends HTMLElement {
             this.resetElement();
             this.run();
         });
+
+        this.oncallbackreject();
 
         return this;
     }

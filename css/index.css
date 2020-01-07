@@ -201,6 +201,13 @@ a:active {
     color: var(--color-garnet-2);
 }
 
+abbr,
+[title] {
+    border-bottom: 1px dotted;
+
+    cursor: help;
+}
+
 prefer-nobr {
     display: inline-block;
 }
@@ -495,6 +502,7 @@ gallery-grid > gallery-item img {
 
 gallery-grid > gallery-item.notice {
     grid-column: 1 / -1;
+    grid-row: span 2;
 }
 
 paginator- {
@@ -631,6 +639,11 @@ instance-details > :nth-child(n + 4) {
     grid-column: 1 / -1;
 }
 
+instance-list[name="upcoming-events"] {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
 /* Slideshows */
 
 slideshow- {
@@ -765,13 +778,13 @@ team-stat-list {
 
 team-stat-list > * {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    align-items: center;
 }
 
 team-stat-list > big-number {
+    justify-content: flex-end;
+
     font-size: calc(.8 * var(--big-number-font-size));
-    text-align: right;
 }
 
 /* Team member lists */
