@@ -1,9 +1,9 @@
 /**
- * @file Script that runs on the Prestige page. Queries data from the VexDB API and counts certain attributes to present team totals.
+ * @file Script that runs on the Achievements page. Queries data from the VexDB API and counts certain attributes to present team totals.
  */
 
 import {qs, qsa, createElement, declade} from "./util.js";
-import {teamNumbers, vexdbGet, vexdbGetForTeams, createNotice, ResultObjectRecordCollector, generateInstanceDetails} from "./app-util.js";
+import {teamNumbers, vexdbGet, vexdbGetForTeams, createNotice, ResultObjectRecordCollector, scopeOf, scopeNames, generateInstanceDetails} from "./app-util.js";
 import {LoadingSign} from "./ce/LoadingSign.js";
 
 const instanceDisplay = qs("instance-display");
@@ -11,7 +11,7 @@ const instanceDisplay = qs("instance-display");
 // Classes used to count instances of a type from the query
 
 /**
- * @class Contains a counter, along with several common properties among counters on the Prestige page.
+ * @class Contains a counter, along with several common properties among counters on the Achievements page.
  */
 class RecordCollectorWrapper {
     constructor({counter, endpointName, displayElementName, sortRecords, generateBlockLabel, buildInstancesDisplay}={}) {
@@ -121,36 +121,18 @@ class RecordCollectorWrapper {
 }
 RecordCollectorWrapper.mapFromCounters = new WeakMap();
 
-const scopeNames = [
-    "World Championship",
-    "State Championship",
-    "Qualifier",
-    "",
-];
-function scopeOf(resultObject) {
-    // Determine the scope of this event
-    // VexDB does not provide a scope property alongside events, but scope can usually be guessed from the event name
-    for (const scopeName of scopeNames) {
-        if (resultObject.name.toUpperCase().includes(scopeName.toUpperCase())) {
-            return scopeName;
-        }
-    }
-
-    return "";
-}
-
 const eventScopeWrapper = new RecordCollectorWrapper({
     counter: new ResultObjectRecordCollector({
         recordEncompasses(record, resultObject) {
             return record.data.scope === scopeOf(resultObject);
         },
-
+    
         toDataObject(resultObject) {
             return {
                 scope: scopeOf(resultObject),
             };
         },
-
+    
         willAccept(resultObject) {
             // no future events
             return new Date() > new Date(resultObject.start);

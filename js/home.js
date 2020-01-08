@@ -1,13 +1,13 @@
 /**
- * @file Script that runs on the homepage. Presents a snippet of the awards list under the Prestige section.
+ * @file Script that runs on the homepage. Presents a snippet of the awards list under the Achievements section.
  */
 
 import "./ce.js";
 import {qs, createElement} from "./util.js";
-import {vexdbGet, vexdbGetForAllTeams, generateInstanceDetails, createNotice} from "./app-util.js";
+import {vexdbGet, vexdbGetForAllTeams, generateInstanceDetails, createNotice, scopeOf, scopeNames} from "./app-util.js";
 
-const prestigeChunkOther = qs(".content-chunk[name='prestige'] > chunk-other");
-const instanceList = qs("instance-list", prestigeChunkOther);
+const achievementsChunkOther = qs(".content-chunk[name='achievements'] > chunk-other");
+const instanceList = qs("instance-list", achievementsChunkOther);
 
 const loadingNotice = instanceList.appendChild(createNotice("loading"));
 
@@ -16,18 +16,54 @@ const loadingNotice = instanceList.appendChild(createNotice("loading"));
     try {
         awardsLists = await vexdbGetForAllTeams("awards");
     } catch (error) {
-        prestigeChunkOther.remove();
+        achievementsChunkOther.remove();
         
         throw error;
     }
 
-    const awards = awardsLists.flat().sort((a, b) => a.order - b.order);
-
-    for (let i = 0; i < 4; i++) {
-        const award = awards[i];
-        if (!award) break;
-
+    const awardsPromises = awardsLists.flat().map(async award => {
         const event = (await vexdbGet("events", {sku: award.sku})).result[0];
+
+        return {
+            award,
+            event,
+            eventScope: event ? scopeOf(event) : "",
+            happened: event ? new Date() >= new Date(event.end) : false,
+        };
+    });
+
+    const awards = await Promise.all(awardsPromises);
+
+    awards.sort((a, b) => {
+        const aScope = scopeNames.indexOf(a.eventScope);
+        const bScope = scopeNames.indexOf(b.eventScope);
+
+        switch (true) {
+            case !a.happened:
+                return 1;
+
+            case !b.happened:
+                return -1;
+
+            case aScope < bScope:
+                return -1;
+
+            case aScope > bScope:
+                return 1;
+
+            case a.award.order < b.award.order:
+                return -1;
+
+            case a.award.order > b.award.order:
+                return 1;
+
+            default:
+                return 0;
+        }
+    });
+
+    for (let i = 0; i < Math.min(4, awards.length); i++) {
+        const {award, event} = awards[i];
 
         const instanceDetails = instanceList.appendChild(generateInstanceDetails.award(award, undefined, event));
         instanceDetails.appendChild(createElement("div", {
@@ -43,7 +79,7 @@ const loadingNotice = instanceList.appendChild(createNotice("loading"));
         }));
     }
 
-    prestigeChunkOther.appendChild(createElement("div", {
+    achievementsChunkOther.appendChild(createElement("div", {
         children: [
             document.createTextNode("⁦… "),
 
@@ -51,7 +87,7 @@ const loadingNotice = instanceList.appendChild(createNotice("loading"));
                 textContent: "and more",
                 
                 properties: {
-                    "href": "./prestige/",
+                    "href": "./achievements/",
                 },
             }),
 
