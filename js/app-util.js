@@ -286,6 +286,10 @@ export class ResultObjectRecordCollector {
         this.records = [];
         return this;
     }
+
+    get nInstances() {
+        return this.records.reduce((accumulator, record) => accumulator + record.count, 0);
+    }
 }
 
 class ResultObjectRecord {
@@ -311,3 +315,22 @@ class ResultObjectRecord {
         return this.instances.length;
     }
 }
+
+export function scopeOf(resultObject) {
+    // Determine the scope of this event
+    // VexDB does not provide a scope property alongside events, but scope can usually be guessed from the event name
+    for (const scopeName of scopeNames) {
+        if (resultObject.name.toUpperCase().includes(scopeName.toUpperCase())) {
+            return scopeName;
+        }
+    }
+
+    return "";
+}
+
+export const scopeNames = [
+    "World Championship",
+    "State Championship",
+    "Qualifier",
+    "",
+];

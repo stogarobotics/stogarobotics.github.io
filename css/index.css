@@ -54,6 +54,7 @@ body {
     --header-height: 300px;
     --header-logo-size: 0;
     --header-slope-height: 8vh;
+    --header-media-vertical-offset: center;
 
     --bar-padding: 36px;
     --bar-padding-right: calc(var(--bar-padding) + 3vw);
@@ -567,7 +568,7 @@ paginator- paginator-number-max {
     font-size: .8em;
 }
 
-/* Prestige instances */
+/* Achievements instances */
 
 instance-display {
     position: sticky;
@@ -911,6 +912,7 @@ header > header-media img {
     height: 100%;
     position: absolute; /* prevents header from being stretched to image in Firefox */
     object-fit: cover;
+    object-position: center var(--header-media-vertical-offset);
 
     z-index: -1; /* prevents header media from being painted over content in Edge */
 }
@@ -1007,7 +1009,7 @@ main > central-content > primary-content {
     z-index: 0; /* prevents header media from being painted over content in Edge */
 }
 
-body.prestigepage main > central-content > primary-content {
+body.achievementspage main > central-content > primary-content {
     grid-template-columns: auto 35%;
 }
 
@@ -1479,7 +1481,7 @@ svg use.logo-gear-rotate {
         grid-template-columns: auto;
     }
 
-    body.prestigepage main > central-content > primary-content {
+    body.achievementspage main > central-content > primary-content {
         grid-template-columns: unset;
     }
 
