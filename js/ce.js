@@ -5,6 +5,7 @@
 import {qsa} from "./util.js";
 import {Slideshow} from "./ce/Slideshow.js";
 import {LoadingSign} from "./ce/LoadingSign.js";
+import {StatList} from "./ce/StatList.js";
 
 (() => {
     // Edge does not have custom element support; use a fallback that maintains functionality
@@ -62,7 +63,6 @@ import {LoadingSign} from "./ce/LoadingSign.js";
         "block-grid",               
         "bar-list",                 // Contains multiple <bar-item>s
         "bar-item",                 // Contains a key-value bar with a header and short explanatory text
-        "team-stat-list",           // Creates a grid to organize team statistics into horizontal bars
         "team-roster",              // Lists all the members of a team (Recommended only as a direct child of [primary-content > aside])
         "team-member",              // Contains information about one member of a team (Recommended only as a direct child of [team-roster])
         "team-member-image",        // Displays the image of a team member (Recommended only as a direct child of [team-member])
@@ -76,6 +76,7 @@ import {LoadingSign} from "./ce/LoadingSign.js";
         "prefer-nobr",              // Prioritizes the contained text last when a line break is to occur on some text
         "speaker-declaration",      // States the speaker of a quote
         "text-notice",              
+        "note-",
     ]) {
         customElements.define(tagName, class extends HTMLElement {});
     }
@@ -83,4 +84,5 @@ import {LoadingSign} from "./ce/LoadingSign.js";
     // Other
     customElements.define("slideshow-", Slideshow);
     customElements.define("loading-sign", LoadingSign);
+    customElements.define("stat-list", StatList); // Creates a grid to organize team statistics into horizontal bars
 })();

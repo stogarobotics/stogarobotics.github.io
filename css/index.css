@@ -120,7 +120,8 @@ input[type="submit"] {
     /* transition: filter .2s ease-out; */
 }
 
-button:hover {
+button:hover,
+button:focus {
     filter: brightness(1.25);
 }
 
@@ -195,7 +196,8 @@ p.foot {
 a {
     color: var(--color-garnet-4);
 }
-a:hover {
+a:hover,
+a:focus {
     color: var(--color-garnet-5);
 }
 a:active {
@@ -308,11 +310,17 @@ input[type="submit"] {
     --transition-bg-size: background-size .15s var(--ease-out-circle);
 }
 nav > nav-content .link:not(.link-home):hover,
+nav > nav-content .link:not(.link-home):focus,
 button-grid > :hover,
+button-grid > :focus,
 navigation-button:hover,
+navigation-button:focus,
 .form-labeled-button-rack > label:hover,
+.form-labeled-button-rack > label:focus,
 .button:hover,
-input[type="submit"]:hover {
+.button:focus,
+input[type="submit"]:hover,
+input[type="submit"]:focus {
     background-size: 100% 100%;
 }
 
@@ -339,9 +347,13 @@ input[type="submit"] {
 }
 
 button-grid > :hover,
+button-grid > :focus,
 navigation-button:hover,
+navigation-button:focus,
 .form-labeled-button-rack > label:hover,
-block-grid > .item.button:hover > * {
+.form-labeled-button-rack > label:focus,
+block-grid > .item.button:hover > *,
+block-grid > .item.button:focus > * {
     color: var(--color-garnet-4);
 }
 
@@ -729,7 +741,18 @@ slideshow- > slideshow-caption {
 slideshow- > slideshow-note {
     grid-row: 3;
     grid-column: 1 / 4;
+}
 
+/* Notes */
+
+note- {
+    display: block;
+    
+    text-align: center;
+}
+
+slideshow- > slideshow-note,
+note- {
     font-size: .8em;
     font-style: italic;
 }
@@ -749,17 +772,21 @@ slideshow- > slideshow-media > a img {
     transition-duration: .15s;
 }
 
-gallery-grid > gallery-item > a:hover img {
+gallery-grid > gallery-item > a:hover img,
+gallery-grid > gallery-item > a:focus img {
     transform: scale(1.15);
 }
-slideshow- > slideshow-media > a:hover img {
+slideshow- > slideshow-media > a:hover img,
+slideshow- > slideshow-media > a:focus img {
     transform: scale(1.1);
 }
 
-gallery-grid > gallery-item > a:hover img {
+gallery-grid > gallery-item > a:hover img,
+gallery-grid > gallery-item > a:focus img {
     filter: sepia(.5) brightness(1.5) contrast(1.25);
 }
-slideshow- > slideshow-media > a:hover img {
+slideshow- > slideshow-media > a:hover img,
+slideshow- > slideshow-media > a:focus img {
     filter: brightness(1.25) contrast(1.25);
 }
 
@@ -771,18 +798,31 @@ slideshow- > slideshow-media > a:hover img {
 
 /* Team statistic lists */
 
-team-stat-list {
+stat-list {
+    margin: .5em 0;
     display: grid;
     grid-template-columns: auto auto;
-    gap: 1em;
+    gap: .8em;
 }
 
-team-stat-list > * {
+stat-list.columnal {
+    grid-auto-flow: column;
+    grid-template-columns: unset;
+    grid-template-rows: auto auto;
+    gap: .2em .8em;
+}
+
+stat-list > * {
     display: flex;
     align-items: center;
 }
 
-team-stat-list > big-number {
+stat-list.columnal > * {
+    flex-direction: column;
+    text-align: center;
+}
+
+stat-list > big-number {
     justify-content: flex-end;
 
     font-size: calc(.8 * var(--big-number-font-size));
@@ -1021,7 +1061,11 @@ body.achievementspage main > central-content > primary-content {
     position: relative;
 }
 
-.content-chunk > chunk-decal {
+.content-chunk.sub {
+    padding: 0;
+}
+
+chunk-decal {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -1039,28 +1083,28 @@ body.achievementspage main > central-content > primary-content {
     pointer-events: none;
 }
 
-.content-chunk > chunk-decal > img {
+chunk-decal > img {
     object-fit: cover;
     object-position: left;
     height: 100%;
 }
 
 /* `flex-grow` on these usually should have no effect (since they use the entire space), unless either <chunk-text> or <chunk-other> is missing */
-.content-chunk > chunk-text {
+chunk-text {
     flex: 100% 1 3;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
-.content-chunk > chunk-other {
+chunk-other {
     flex: 45% 1 1;
     margin-left: 2em;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
-.content-chunk > chunk-other:empty {
+chunk-other:empty {
     flex-basis: 0;
     margin: 0;
 }
@@ -1069,20 +1113,25 @@ content-chunks > .content-chunk {
     background: var(--color-chunk-tone-1);
 }
 
+.content-chunk.reverse,
 content-chunks > .content-chunk:nth-child(even) {
     flex-direction: row-reverse;
+}
 
+content-chunks > .content-chunk:nth-child(even) {
     /* as previously defined, but swapped */
     --color-chunk-tone-1: var(--color-chunk-tone-init-2);
     --color-chunk-tone-2: var(--color-chunk-tone-init-1);
 }
 
-.content-chunk:nth-child(even) > chunk-other {
+.content-chunk.reverse > chunk-other,
+content-chunks > .content-chunk:nth-child(even) > chunk-other {
     margin-left: 0;
     margin-right: 2em;
 }
 
-.content-chunk:nth-child(even) > chunk-other:empty {
+.content-chunk.reverse > chunk-other:empty,
+content-chunks > .content-chunk:nth-child(even) > chunk-other:empty {
     margin-right: 0;
 }
 
@@ -1205,7 +1254,8 @@ nav > nav-content > nav-grid-rack > .link {
     transition-duration: .1s;
 }
 
-nav > nav-content > nav-grid-rack > .link:hover {
+nav > nav-content > nav-grid-rack > .link:hover,
+nav > nav-content > nav-grid-rack > .link:focus {
     color: #fff;
 }
 
@@ -1233,13 +1283,15 @@ nav > nav-content > .link-home > svg > use[href="#logo-gear"] {
     transition: transform 1s ease;
 }
 
-nav > nav-content > .link-home:hover > svg {
+nav > nav-content > .link-home:hover > svg,
+nav > nav-content > .link-home:focus > svg {
     transform: translateY(-10px) scale(1.1);
 
     filter: drop-shadow(0 20px 10px var(--color-garnet-1-7f));
 }
 
-nav > nav-content > .link-home:hover > svg > use[href="#logo-gear"] {
+nav > nav-content > .link-home:hover > svg > use[href="#logo-gear"],
+nav > nav-content > .link-home:focus > svg > use[href="#logo-gear"] {
     transform: rotate(calc(1turn / 6));
     
     /* Deals with ease in */
@@ -1519,7 +1571,7 @@ svg use.logo-gear-rotate {
     }
 
     footer > chunk-other {
-        margin-top: 1em;
+        margin-top: 1.5em;
     }
 
     copyright-info {
@@ -1543,13 +1595,16 @@ svg use.logo-gear-rotate {
     }
 
     .content-chunk,
+    .content-chunk.reverse,
     content-chunks > .content-chunk:nth-child(even) {
         flex-direction: column;
     }
 
     .content-chunk > chunk-other,
-    .content-chunk:nth-child(even) > chunk-other {
+    .content-chunk.reverse > chunk-other,
+    content-chunks > .content-chunk:nth-child(even) > chunk-other {
         flex: 100% 0 1;
+        margin-top: 1.5em;
         margin-left: 0;
         margin-right: 0;
     }

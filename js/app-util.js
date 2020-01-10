@@ -68,7 +68,7 @@ export async function vexdbGetForTeams(endpointNameGet, teamNumbersTarget, optio
  * @param {boolean} [attachTeamNumber] Whether to add the team number as a property to the object of each request.
  */
 export async function vexdbGetForAllTeams(endpointNameGet, options, attachTeamNumber) {
-    return await vexdbGetForTeams(endpointNameGet, teamNumbers, options, attachTeamNumber)
+    return (await vexdbGetForTeams(endpointNameGet, teamNumbers, options, attachTeamNumber)).flat();
 }
 
 /**
@@ -291,6 +291,41 @@ export class ResultObjectRecordCollector {
         return this.records.reduce((accumulator, record) => accumulator + record.count, 0);
     }
 }
+ResultObjectRecordCollector.generateCommon = {
+    eventsByScope() {
+        return new ResultObjectRecordCollector({
+            recordEncompasses(record, resultObject) {
+                return record.data.scope === scopeOf(resultObject);
+            },
+        
+            toDataObject(resultObject) {
+                return {
+                    scope: scopeOf(resultObject),
+                };
+            },
+        
+            willAccept(resultObject) {
+                // no future events
+                return new Date() > new Date(resultObject.start);
+            },
+        })
+    },
+
+    awards() {
+        return new ResultObjectRecordCollector({
+            recordEncompasses(record, resultObject) {
+                return record.data.name === resultObject.name;
+            },
+    
+            toDataObject(resultObject) {
+                return {
+                    name: resultObject.name,
+                    order: resultObject.order,
+                };
+            },
+        });
+    },
+};
 
 class ResultObjectRecord {
     constructor(data, counter) {
@@ -334,3 +369,7 @@ export const scopeNames = [
     "Qualifier",
     "",
 ];
+
+export function groomAwardName(name) {
+    return name.replace(/ \(VRC\/VEXU\)/g, "");
+}

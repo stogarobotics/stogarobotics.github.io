@@ -2,7 +2,7 @@
  * @file Provides functionality for the `<loading-sign>` element.
  */
 
- import {declade, createElement} from "../util.js";
+import {declade, createElement} from "../util.js";
 import {createNotice, VexdbApiError} from "../app-util.js";
 
 function instantiate(loadingSign, asyncCallback, oncallbackresolve=() => {}, oncallbackreject=() => {}, callbackRerun=() => {}) {

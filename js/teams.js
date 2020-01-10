@@ -11,11 +11,7 @@ const teamNumber = qs("[name='team-number']").value;
 // Events, matches, award counts
 
 {
-    const teamStatContainer = qs("[name='team-statistics']");
-    const teamStatList = qs("team-stat-list");
-
-    const teamStatNumbers = qsa("big-number", teamStatList);
-    const teamStatLabels = qsa("h4", teamStatList);
+    const statList = qs("stat-list");
 
     const targetStatistics = [["events"], ["matches"], ["awards"]];
     
@@ -27,18 +23,12 @@ const teamNumber = qs("[name='team-number']").value;
 
             // const statBar = buildStatisticBar("…", targetStatistic[1]);
         
-            teamStatNumbers[i].textContent = "…";
+            statList.setNumberAsLoading(i);
 
             targertStatisticsPromises.push((async () => {
                 const count = (await vexdbGet(targetStatistic[0], {team: teamNumber})).size;
 
-                teamStatNumbers[i].textContent = count.toLocaleString();
-
-                if (count === 1) {
-                    const label = teamStatLabels[i];
-                    // to deal with the events registered count having explanation text
-                    (label.firstElementChild || label).textContent = label.getAttribute("data-singular");
-                }
+                statList.setNumber(i, count);
             })());
         }
 
@@ -46,7 +36,7 @@ const teamNumber = qs("[name='team-number']").value;
     };
 
     const loadingSign = LoadingSign.create(asyncCallback);
-    teamStatContainer.insertBefore(loadingSign, teamStatList);
+    statList.parentElement.insertBefore(loadingSign, statList);
 
     loadingSign.run();
 
@@ -54,12 +44,12 @@ const teamNumber = qs("[name='team-number']").value;
     //     return [
     //         createElement("big-number", {
     //             textContent: value.toLocaleString(),
-    //             parent: teamStatList,
+    //             parent: statList,
     //         }),
     
     //         createElement("h4", {
     //             textContent: label,
-    //             parent: teamStatList,
+    //             parent: statList,
     //         }),
     //     ];
     // }
