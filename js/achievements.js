@@ -3,7 +3,7 @@
  */
 
 import {qs, qsa, createElement, declade} from "./util.js";
-import {teamNumbers, vexdbGet, vexdbGetForTeams, createNotice, ResultObjectRecordCollector, scopeOf, scopeNames, generateInstanceDetails} from "./app-util.js";
+import {teamNumbers, vexdbGet, vexdbGetForTeams, createNotice, ResultObjectRecordCollector, groomAwardName, scopeNames, generateInstanceDetails} from "./app-util.js";
 import {LoadingSign} from "./ce/LoadingSign.js";
 
 const instanceDisplay = qs("instance-display");
@@ -122,22 +122,7 @@ class RecordCollectorWrapper {
 RecordCollectorWrapper.mapFromCounters = new WeakMap();
 
 const eventScopeWrapper = new RecordCollectorWrapper({
-    counter: new ResultObjectRecordCollector({
-        recordEncompasses(record, resultObject) {
-            return record.data.scope === scopeOf(resultObject);
-        },
-    
-        toDataObject(resultObject) {
-            return {
-                scope: scopeOf(resultObject),
-            };
-        },
-    
-        willAccept(resultObject) {
-            // no future events
-            return new Date() > new Date(resultObject.start);
-        },
-    }),
+    counter: ResultObjectRecordCollector.generateCommon.eventsByScope(),
 
     endpointName: "events",
     displayElementName: "events",
@@ -162,18 +147,7 @@ const eventScopeWrapper = new RecordCollectorWrapper({
 });
 
 const awardsWrapper = new RecordCollectorWrapper({
-    counter: new ResultObjectRecordCollector({
-        recordEncompasses(record, resultObject) {
-            return record.data.name === resultObject.name;
-        },
-
-        toDataObject(resultObject) {
-            return {
-                name: resultObject.name,
-                order: resultObject.order,
-            };
-        },
-    }),
+    counter: ResultObjectRecordCollector.generateCommon.awards(),
 
     endpointName: "awards",
     displayElementName: "awards",
@@ -183,7 +157,7 @@ const awardsWrapper = new RecordCollectorWrapper({
     },
 
     generateBlockLabel(record) {
-        return record.data.name.replace(/ \(VRC\/VEXU\)/g, "");
+        return groomAwardName(record.data.name);
     },
     
     buildInstancesDisplay(instances, list) {

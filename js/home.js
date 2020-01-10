@@ -6,22 +6,34 @@ import "./ce.js";
 import {qs, createElement} from "./util.js";
 import {vexdbGet, vexdbGetForAllTeams, generateInstanceDetails, createNotice, scopeOf, scopeNames} from "./app-util.js";
 
+const nMaxAwardsToShow = 4;
+
 const achievementsChunkOther = qs(".content-chunk[name='achievements'] > chunk-other");
 const instanceList = qs("instance-list", achievementsChunkOther);
 
 const loadingNotice = instanceList.appendChild(createNotice("loading"));
 
 (async () => {
-    let awardsLists;
+    // The awards preview causes a page jump; this counteracts it unless the user has already scrolled
+    let scrolled = false;
+    function handleScroll() {
+        scrolled = true;
+    }
+
+    // addEventListener("scroll", handleScroll, {once: true});
+
+    let awardsList;
+    // If this fails, remove the awards preview entirely
     try {
-        awardsLists = await vexdbGetForAllTeams("awards");
+        awardsList = await vexdbGetForAllTeams("awards");
     } catch (error) {
         achievementsChunkOther.remove();
         
         throw error;
     }
 
-    const awardsPromises = awardsLists.flat().map(async award => {
+    // Get the event result object from each award and extract relevant data
+    const awardsPromises = awardsList.map(async award => {
         const event = (await vexdbGet("events", {sku: award.sku})).result[0];
 
         return {
@@ -34,6 +46,8 @@ const loadingNotice = instanceList.appendChild(createNotice("loading"));
 
     const awards = await Promise.all(awardsPromises);
 
+
+    // Sorts awards first by scope, then by award prestige
     awards.sort((a, b) => {
         const aScope = scopeNames.indexOf(a.eventScope);
         const bScope = scopeNames.indexOf(b.eventScope);
@@ -62,7 +76,7 @@ const loadingNotice = instanceList.appendChild(createNotice("loading"));
         }
     });
 
-    for (let i = 0; i < Math.min(4, awards.length); i++) {
+    for (let i = 0; i < Math.min(nMaxAwardsToShow, awards.length); i++) {
         const {award, event} = awards[i];
 
         const instanceDetails = instanceList.appendChild(generateInstanceDetails.award(award, undefined, event));
@@ -79,7 +93,7 @@ const loadingNotice = instanceList.appendChild(createNotice("loading"));
         }));
     }
 
-    achievementsChunkOther.appendChild(createElement("div", {
+    achievementsChunkOther.appendChild(createElement("note-", {
         children: [
             document.createTextNode("⁦… "),
 
@@ -94,6 +108,12 @@ const loadingNotice = instanceList.appendChild(createNotice("loading"));
             document.createTextNode(" ⁦…"),
         ],
     }));
+
+    // Do the page jump counteraction
+    removeEventListener("scroll", handleScroll);
+    if (!scrolled && location.hash.replace(/#/g, "")) {
+        location.replace(location.hash);
+    }
 
     loadingNotice.remove();
 })();
