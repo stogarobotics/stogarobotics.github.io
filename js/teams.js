@@ -13,21 +13,36 @@ const teamNumber = qs("[name='team-number']").value;
 {
     const statList = qs("stat-list");
 
-    const targetStatistics = [["events"], ["matches"], ["awards"]];
+    const targetStatisticCallbacks = [
+        async () => {
+            return (await vexdbGet("events", {team: teamNumber, nodata: true})).size;
+        },
+
+        async () => {
+            return (await vexdbGet("matches", {team: teamNumber, nodata: true})).size;
+        },
+
+        async () => {
+            const awards = (await vexdbGet("awards", {team: teamNumber})).result;
+            
+            let nLegitimateAwards = 0;
+            for (const resultObject of awards) {
+                const event = (await vexdbGet("events", {sku: resultObject.sku})).result[0];
+                nLegitimateAwards += Number(!event || new Date() > new Date(event.end));
+            }
+
+            return nLegitimateAwards;
+        },
+    ];
     
     const asyncCallback = () => {
         const targertStatisticsPromises = [];
         
-        for (let i = 0; i < targetStatistics.length; i++) {
-            const targetStatistic = targetStatistics[i];
-
-            // const statBar = buildStatisticBar("…", targetStatistic[1]);
-        
+        for (let i = 0; i < targetStatisticCallbacks.length; i++) {
             statList.setNumberAsLoading(i);
 
             targertStatisticsPromises.push((async () => {
-                const count = (await vexdbGet(targetStatistic[0], {team: teamNumber})).size;
-
+                const count = await targetStatisticCallbacks[i]();
                 statList.setNumber(i, count);
             })());
         }
@@ -73,7 +88,8 @@ const teamNumber = qs("[name='team-number']").value;
         list.parentElement.insertBefore(loadingSign, list);
 
         // VexDB's "status" parameter currently does not accept multiple values
-        upcomingEventCollector.collect((await vexdbGet("events", {team: teamNumber})).result);
+        upcomingEventCollector.collect((await vexdbGet("events", {team: teamNumber, status: "current"})).result);
+        upcomingEventCollector.collect((await vexdbGet("events", {team: teamNumber, status: "future"})).result);
     };
 
     const oncallbackresolve = () => {

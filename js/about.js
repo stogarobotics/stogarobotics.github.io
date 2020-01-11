@@ -30,40 +30,38 @@ import {LoadingSign} from "./ce/LoadingSign.js";
         }
 
         promises.push((async () => {
-            await eventScopeCollector.collectAsync(await vexdbGetForAllTeams("events", {status: "past"}))
+            await eventScopeCollector.collectAsync(await vexdbGetForAllTeams("events", {status: "past"}));
+
+            // Number of Worlds appearances
+            statList.setNumber(0, eventScopeCollector.records.find(record => record.data.scope === scopeNames[0]).count);
+            // Total appearances
+            statList.setNumber(1, eventScopeCollector.nInstances);
         })());
         
         promises.push((async () => {
-            await awardsCollector.collectAsync(await vexdbGetForAllTeams("awards"))
+            await awardsCollector.collectAsync(await vexdbGetForAllTeams("awards"));
+
+            let nTournamentFinals = 0; // Counts both Champions and Finalists awards
+            let nDivisionFinalists = 0;
+
+            for (const record of awardsCollector.records) {
+                const name = groomAwardName(record.data.name);
+
+                if (["Tournament Champions", "Tournament Finalists"].includes(name)) {
+                    nTournamentFinals += record.count;
+                } else if (name === "Division Finalist") {
+                    nDivisionFinalists += record.count;
+                }
+            }
+
+            statList.setNumber(2, nTournamentFinals);
+            statList.setNumber(3, nDivisionFinalists);
         })());
 
         return Promise.all(promises);
     };
 
-    const oncallbackresolve = () => {
-        const tourneyChampionsOrFinalists = name => [
-            "Tournament Champions",
-            "Tournament Finalists",
-        ].includes(groomAwardName(name));
-
-        const stats = [
-            eventScopeCollector.records.find(record => record.data.scope === scopeNames[0]).count,
-
-            eventScopeCollector.nInstances,
-
-            awardsCollector.records.reduce((accumulator, record) =>
-                accumulator + (tourneyChampionsOrFinalists(record.data.name) ? record.count : 0), 0),
-
-            awardsCollector.records.find(record => groomAwardName(record.data.name) === "Division Finalist").count,
-        ];
-
-        for (let i = 0; i < stats.length; i++) {
-            statList.setNumber(i, stats[i]);
-        }
-    };
-
-    const loadingSign = LoadingSign.create(asyncCallback, oncallbackresolve);
-
+    const loadingSign = LoadingSign.create(asyncCallback);
     loadingSign.run();
 
     async function findEvent(sku) {
