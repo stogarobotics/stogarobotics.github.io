@@ -11,11 +11,19 @@ const instanceDisplay = qs("instance-display");
 // Classes used to count instances of a type from the query
 
 /**
- * @class Contains a counter, along with several common properties among counters on the Achievements page.
+ * @class Contains a collector, along with several common properties among collectors on the Achievements page.
  */
 class RecordCollectorWrapper {
-    constructor({counter, endpointName, displayElementName, sortRecords, generateBlockLabel, buildInstancesDisplay}={}) {
-        this.counter = counter;
+    constructor({
+        collector,
+        endpointName,
+        displayElementName,
+        sortRecords,
+        generateBlockLabel,
+        buildInstancesDisplay,
+        queryOptions={},
+    }={}) {
+        this.collector = collector;
         this.endpointName = endpointName;
         this.grid = qs(`block-grid[name="${displayElementName}"]`);
         this.nLoadingFails = 0;
@@ -24,7 +32,33 @@ class RecordCollectorWrapper {
         this.generateBlockLabel = generateBlockLabel;
         this.buildInstancesDisplay = buildInstancesDisplay;
 
-        this.constructor.mapFromCounters.set(counter, this);
+        this.queryOptions = queryOptions;
+
+        this.constructor.mapFromCollectors.set(collector, this);
+    }
+
+    async count(teamNumbersTarget) {
+        // Query VexDB
+        const resultObjects = (await vexdbGetForTeams(this.endpointName, teamNumbersTarget, this.queryOptions, true)).flat();
+    
+        await this.collector.collectAsync(resultObjects);
+    
+        // Show the list of categories
+        this.updateDisplay();
+    }
+
+    updateDisplay() {
+        declade(this.grid);
+
+        this.collector.records = this.sortRecords(this.collector);
+
+        // Display the counts
+        for (const record of this.collector.records) {
+            createBlock(record.count, this.generateBlockLabel(record), this.grid, false, record);
+        }
+    
+        const nTotal = this.collector.records.reduce((accumulator, {count}) => accumulator + count, 0);
+        createBlock(nTotal, "Total", this.grid, true, this);
     }
 
     getLoadingFailMessage() {
@@ -38,30 +72,6 @@ class RecordCollectorWrapper {
             default:
                 return ` ${this.nLoadingFails} times`;
         }
-    }
-
-    updateDisplay() {
-        declade(this.grid);
-
-        this.counter.records = this.sortRecords(this.counter);
-
-        // Display the counts
-        for (const record of this.counter.records) {
-            createBlock(record.count, this.generateBlockLabel(record), this.grid, false, record);
-        }
-    
-        const nTotal = this.counter.records.reduce((accumulator, {count}) => accumulator + count, 0);
-        createBlock(nTotal, "Total", this.grid, true, this);
-    }
-
-    async count(teamNumbersTarget) {
-        // Query VexDB
-        const resultObjects = (await vexdbGetForTeams(this.endpointName, teamNumbersTarget, {}, true)).flat();
-    
-        this.counter.count(resultObjects);
-    
-        // Show the list of categories
-        this.updateDisplay();
     }
     
     async displayCategoryInstances(instances) {
@@ -119,20 +129,21 @@ class RecordCollectorWrapper {
         }
     }
 }
-RecordCollectorWrapper.mapFromCounters = new WeakMap();
+RecordCollectorWrapper.mapFromCollectors = new WeakMap();
+RecordCollectorWrapper.loadingSigns = new WeakMap();
 
 const eventScopeWrapper = new RecordCollectorWrapper({
-    counter: ResultObjectRecordCollector.generateCommon.eventsByScope(),
+    collector: ResultObjectRecordCollector.createCommon.eventsByScope(),
 
     endpointName: "events",
     displayElementName: "events",
 
-    sortRecords(counter) {
-        return counter.records.sort((a, b) => scopeNames.indexOf(a.data.scope) - scopeNames.indexOf(b.data.scope));
+    sortRecords(collector) {
+        return collector.records.sort((a, b) => scopeNames.indexOf(a.data.scope) - scopeNames.indexOf(b.data.scope));
     },
 
     generateBlockLabel(record) {
-        return record.data.scope ? `${record.data.scope} appearances` : "Other";
+        return `${record.data.scope || "Qualifier/other"} appearances`;
     },
     
     buildInstancesDisplay(instances, list) {
@@ -144,16 +155,26 @@ const eventScopeWrapper = new RecordCollectorWrapper({
             generateInstanceDetails.event(instance, instanceDetailsContainer);
         }
     },
+
+    queryOptions: {
+        status: "past",
+    },
 });
 
 const awardsWrapper = new RecordCollectorWrapper({
-    counter: ResultObjectRecordCollector.generateCommon.awards(),
+    collector: ResultObjectRecordCollector.createCommon.awardsByType({
+        async willAccept(resultObject) {
+            // Only awards from past events or from those unknown to VexDB.
+            const event = await findEvent(resultObject.sku);
+            return !event || new Date() > new Date(event.end);
+        },
+    }),
 
     endpointName: "awards",
     displayElementName: "awards",
 
-    sortRecords(counter) {
-        return counter.records.sort((a, b) => a.data.order - b.data.order);
+    sortRecords(collector) {
+        return collector.records.sort((a, b) => a.data.order - b.data.order);
     },
 
     generateBlockLabel(record) {
@@ -175,7 +196,7 @@ const awardsWrapper = new RecordCollectorWrapper({
 });
 
 async function findEvent(sku) {
-    for (const instance of eventScopeWrapper.counter.records.map(record => record.instances).flat()) {
+    for (const instance of eventScopeWrapper.collector.instances()) {
         if (instance.sku === sku) {
             return instance;
         }
@@ -185,12 +206,11 @@ async function findEvent(sku) {
 }
 
 
-// Run a counter
-
+// Run a collector
 
 let nBlock = 0; // numerical id, used to match up each block with its <input>
 // Create a box displaying a number with a label
-function createBlock(number, label, parent, emphasize=false, counterWrapper) {
+function createBlock(number, label, parent, emphasize=false, collectorWrapper) {
     const classes = ["button", "item"];
 
     if (emphasize) {
@@ -209,7 +229,7 @@ function createBlock(number, label, parent, emphasize=false, counterWrapper) {
         parent,
     });
     
-    inputsToRecords.set(input, counterWrapper);
+    inputsToRecords.set(input, collectorWrapper);
 
     createElement("label", {
         attributes: [
@@ -269,13 +289,13 @@ recordForm.addEventListener("change", () => {
     if (!record) { // No record selected
         instanceDisplayInit();
     } else if (record instanceof RecordCollectorWrapper) { // "Total" record selected
-        const counterWrapper = record;
+        const collectorWrapper = record;
 
-        const instances = counterWrapper.counter.instances();
-        counterWrapper.displayCategoryInstances(instances);
+        const instances = collectorWrapper.collector.instances();
+        collectorWrapper.displayCategoryInstances(instances);
     } else { // Individual record selected
         const instances = record.instances;
-        RecordCollectorWrapper.mapFromCounters.get(record.counter).displayCategoryInstances(instances);
+        RecordCollectorWrapper.mapFromCollectors.get(record.collector).displayCategoryInstances(instances);
     }
 });
 
@@ -297,19 +317,32 @@ function query() {
 
     const statusPromises = [];
 
-    for (const counterWrapper of [eventScopeWrapper, awardsWrapper]) {
-        counterWrapper.counter.clear();
+    for (const collectorWrapper of [eventScopeWrapper, awardsWrapper]) {
+        const asyncCallback = () => {
+            // If there is a loading sign president from a different query, remove it and replace it
+            const loadingSignOld = RecordCollectorWrapper.loadingSigns.get(collectorWrapper);
+            if (loadingSign !== loadingSignOld && loadingSignOld) {
+                loadingSignOld.remove();
+            }
+            // for initial case
+            RecordCollectorWrapper.loadingSigns.set(collectorWrapper, loadingSign);
 
-        // Select all teams if no filters are selected
-        const asyncCallback = () => counterWrapper.count(teamNumbersTarget.length !== 0 ? teamNumbersTarget : teamNumbers);
+            declade(collectorWrapper.grid).parentElement.insertBefore(loadingSign, collectorWrapper.grid);
 
-        const loadingSign = LoadingSign.create(asyncCallback);
-        declade(counterWrapper.grid).parentElement.insertBefore(loadingSign, counterWrapper.grid);
+            collectorWrapper.collector.clear();
+
+            // Select all teams if no filters are selected
+            return collectorWrapper.count(teamNumbersTarget.length !== 0 ? teamNumbersTarget : teamNumbers);
+        };
+
+        const oncallbackresolve = () => {
+            loadingSign.remove();
+        };
+
+        const loadingSign = LoadingSign.create(asyncCallback, oncallbackresolve);
 
         statusPromises.push(new Promise(resolve => {
-            loadingSign.run().then(() => {
-                loadingSign.remove();
-            }).finally(resolve); // `finally` so that the status promises resolve even when loading fails
+            loadingSign.run().finally(resolve); // `finally` so that the status promises resolve even when loading fails
         }));
     }
 
