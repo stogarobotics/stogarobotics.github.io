@@ -290,6 +290,7 @@ speaker-declaration::before {
     content: "—";
 }
 
+
 /* Buttons */
 
 /* Controls the animation of the nav links and buttons upon hover */
@@ -889,17 +890,6 @@ team-member:not(.large) {
     padding: 0 1em;
 }
 
-/* External tools */
-
-.google-maps {
-    margin: 2em 0;
-    border: 0;
-    height: 350px;
-
-    background: var(--color-chunk-tone-2);
-    border-radius: 8px;
-}
-
 /* Main */
 
 main {
@@ -932,6 +922,8 @@ header {
     display: grid;
     grid-template-rows: 1fr min-content 1fr;
     grid-template-columns: var(--nav-reservation-small) auto;
+
+    color: #fff;
 }
 
 body.homepage header {
@@ -1070,7 +1062,6 @@ body.achievementspage main > central-content > primary-content {
 }
 
 .content-chunk.sub {
-    margin: .5em 0;
     padding: 0;
 }
 
@@ -1323,6 +1314,7 @@ main > footer {
 
 footer {
     background: var(--color-garnet-1);
+    color: var(--color-white-1);
 
     --color-chunk-tone-1: var(--color-garnet-1);
     --color-chunk-tone-2: var(--color-garnet-2);
@@ -1456,13 +1448,10 @@ svg use.logo-gear-rotate {
         color: var(--color-white-1);
     }
 
-    .light-on-dark ::selection {
+    header ::selection,
+    footer ::selection {
         background: var(--color-white-1-7f);
     }
-}
-
-.light-on-dark {
-    color: var(--color-white-1);
 }
 
 /* *****************************************************************************************************************
