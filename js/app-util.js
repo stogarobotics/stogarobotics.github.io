@@ -82,20 +82,23 @@ export function createNotice(text) {
     });
 }
 
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 /**
- * Converts a date to `YYYY-MM-DD` format.
+ * Converts a date to `Mmm D, YYYY` format.
  * @param {Date} date The date to reference.
- * @returns {string} A string in `YYYY-MM-DD` format.
+ * @returns {string} A string in `Mmm D, YYYY` format.
  */
 export function dateString(date) {
-    return `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, "0")}-${date.getUTCDate().toString().padStart(2, "0")}`;
+    return `${months[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
+    // return `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, "0")}-${date.getUTCDate().toString().padStart(2, "0")}`;
 }
 
 /**
  * Converts a string indicating a range of dates if the two dates do not represent the time boundaries of a single-day event according to VexDB.
  * @param {Date} start The start of an event.
  * @param {Date} end The end of an event.
- * @returns {string} A string in `YYYY-MM-DD – YYYY-MM-DD` format if the event is not single-day, or `YYYY-MM-DD` if it is single-day.
+ * @returns {string} A string in `Mmm D, YYYY – Mmm D, YYYY` format if the event is not single-day, or `Mmm D, YYYY` if it is single-day.
  */
 export function dateRangeString(start, end) {
     // From VexDB API documentation
@@ -253,13 +256,32 @@ export class ResultObjectRecordCollector {
         this.clear();
     }
 
+    /**
+     * Adds a record identified by the given result object's data object.
+     * @param {object} resultObject The VexDB result object to initialize the record.
+     */
     addRecord(resultObject) {
         const record = new ResultObjectRecord(this.toDataObject(resultObject), this);
         this.records.push(record);
         return record;
     }
 
-    count(resultObjects) {
+    /**
+     * Adds a record with the given result object, identified by the result object's data object, treating
+     * `toDataObject` as async if it directly returns a promise.
+     * @param {object} resultObject The VexDB result object to initialize the record.
+     */
+    async addRecordAsync(resultObject) {
+        const record = new ResultObjectRecord(await Promise.resolve(this.toDataObject(resultObject)), this);
+        this.records.push(record);
+        return record;
+    }
+
+    /**
+     * Adds result objects to this collector's records.
+     * @param {object[]} resultObjects The VexDB result objects to parse.
+     */
+    collect(resultObjects) {
         // Iterate through the result objects
         for (const resultObject of resultObjects) {
             // Skip this result object if invalid
@@ -278,6 +300,38 @@ export class ResultObjectRecordCollector {
         }
     }
 
+    /**
+     * Adds result objects to this collector's records, treating `willAccept`, `recordEncompasses`, and `toDataObject`
+     * as async if they directly return promises.
+     * @param {object[]} resultObjects The VexDB result objects to parse.
+     */
+    async collectAsync(resultObjects) {
+        // Iterate through the result objects
+        for (const resultObject of resultObjects) {
+            // Skip this result object if invalid
+            if (!await Promise.resolve(this.willAccept(resultObject))) continue;
+
+            let recordTarget;
+
+            // Find an existing record that encompasses this result object
+            for (const record of this.records) {
+                if (!await Promise.resolve(this.recordEncompasses(record, resultObject))) continue;
+
+                recordTarget = record;
+                break;
+            }
+
+            // If not present, create a new record
+            if (!recordTarget) {
+                recordTarget = await this.addRecordAsync(resultObject);
+            }
+
+            // Add this record as an instance
+            recordTarget.addInstance(resultObject);
+        }
+        
+    }
+
     instances() {
         return this.records.map(record => record.instances).flat();
     }
@@ -291,9 +345,12 @@ export class ResultObjectRecordCollector {
         return this.records.reduce((accumulator, record) => accumulator + record.count, 0);
     }
 }
-ResultObjectRecordCollector.generateCommon = {
-    eventsByScope() {
-        return new ResultObjectRecordCollector({
+/**
+ * Common result object collectors.
+ */
+ResultObjectRecordCollector.createCommon = {
+    eventsByScope(options={}) {
+        return new ResultObjectRecordCollector(Object.assign({
             recordEncompasses(record, resultObject) {
                 return record.data.scope === scopeOf(resultObject);
             },
@@ -303,16 +360,11 @@ ResultObjectRecordCollector.generateCommon = {
                     scope: scopeOf(resultObject),
                 };
             },
-        
-            willAccept(resultObject) {
-                // no future events
-                return new Date() > new Date(resultObject.start);
-            },
-        })
+        }, options));
     },
 
-    awards() {
-        return new ResultObjectRecordCollector({
+    awardsByType(options={}) {
+        return new ResultObjectRecordCollector(Object.assign({
             recordEncompasses(record, resultObject) {
                 return record.data.name === resultObject.name;
             },
@@ -323,14 +375,14 @@ ResultObjectRecordCollector.generateCommon = {
                     order: resultObject.order,
                 };
             },
-        });
+        }, options));
     },
 };
 
 class ResultObjectRecord {
-    constructor(data, counter) {
+    constructor(data, collector) {
         this.data = data;
-        this.counter = counter;
+        this.collector = collector;
 
         this.instances = [];
     }
@@ -343,7 +395,7 @@ class ResultObjectRecord {
     }
 
     encompasses(resultObject) {
-        return this.counter.recordEncompasses(this, resultObject);
+        return this.collector.recordEncompasses(this, resultObject);
     }
 
     get count() {
@@ -366,7 +418,6 @@ export function scopeOf(resultObject) {
 export const scopeNames = [
     "World Championship",
     "State Championship",
-    "Qualifier",
     "",
 ];
 
