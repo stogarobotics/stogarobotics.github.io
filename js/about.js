@@ -3,26 +3,16 @@
  */
 
 import {qs} from "./util.js";
-import {vexdbGet, vexdbGetForAllTeams, ResultObjectRecordCollector, scopeNames, groomAwardName} from "./app-util.js";
+import {vexdbGetForAllTeams, ResultObjectRecordCollector, scopeNames, groomAwardName} from "./app-util.js";
 import {LoadingSign} from "./ce/LoadingSign.js";
 
 {
-    const eventScopeCollector = ResultObjectRecordCollector.createCommon.eventsByScope();
-    const awardsCollector = ResultObjectRecordCollector.createCommon.awardsByType({
-        async willAccept(resultObject) {
-            const event = await findEvent(resultObject.sku);
-            return !event || new Date() > new Date(event.end);
-        },
-    });
+    const eventScopeCollector = ResultObjectRecordCollector.generateCommon.eventsByScope();
+    const awardsCollector = ResultObjectRecordCollector.generateCommon.awards();
 
     const statList = qs("stat-list");
     
     const asyncCallback = () => {
-        eventScopeCollector.clear();
-        awardsCollector.clear();
-
-        statList.parentElement.insertBefore(loadingSign, statList);
-
         const promises = [];
         
         for (let i = 0; i < statList.numbers.length; i++) {
@@ -30,11 +20,11 @@ import {LoadingSign} from "./ce/LoadingSign.js";
         }
 
         promises.push((async () => {
-            await eventScopeCollector.collectAsync(await vexdbGetForAllTeams("events", {status: "past"}))
+            eventScopeCollector.count(await vexdbGetForAllTeams("events"));
         })());
-        
+
         promises.push((async () => {
-            await awardsCollector.collectAsync(await vexdbGetForAllTeams("awards"))
+            awardsCollector.count(await vexdbGetForAllTeams("awards"));
         })());
 
         return Promise.all(promises);
@@ -63,16 +53,7 @@ import {LoadingSign} from "./ce/LoadingSign.js";
     };
 
     const loadingSign = LoadingSign.create(asyncCallback, oncallbackresolve);
+    statList.parentElement.insertBefore(loadingSign, statList);
 
     loadingSign.run();
-
-    async function findEvent(sku) {
-        for (const instance of eventScopeCollector.instances()) {
-            if (instance.sku === sku) {
-                return instance;
-            }
-        }
-    
-        return (await vexdbGet("events", {sku})).result[0];
-    }
 }

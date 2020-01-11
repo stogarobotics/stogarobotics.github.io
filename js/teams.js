@@ -2,7 +2,7 @@
  * @file Script that runs on team pages. Loads the statistic summaries that appear on the page.
  */
 
-import {qs, declade} from "./util.js";
+import {qs, qsa, declade} from "./util.js";
 import {createNotice, vexdbGet, generateInstanceDetails, ResultObjectRecordCollector} from "./app-util.js";
 import {LoadingSign} from "./ce/LoadingSign.js";
 
@@ -62,7 +62,6 @@ const teamNumber = qs("[name='team-number']").value;
     
     const upcomingEventCollector = new ResultObjectRecordCollector({
         willAccept(resultObject) {
-            // No past events
             return new Date() < new Date(resultObject.end);
         },
     });
@@ -70,10 +69,7 @@ const teamNumber = qs("[name='team-number']").value;
     const asyncCallback = async () => {
         declade(list);
 
-        list.parentElement.insertBefore(loadingSign, list);
-
-        // VexDB's "status" parameter currently does not accept multiple values
-        upcomingEventCollector.collect((await vexdbGet("events", {team: teamNumber})).result);
+        upcomingEventCollector.count((await vexdbGet("events", {team: teamNumber})).result);
     };
 
     const oncallbackresolve = () => {
@@ -91,7 +87,9 @@ const teamNumber = qs("[name='team-number']").value;
     };
 
     const loadingSign = LoadingSign.create(asyncCallback, oncallbackresolve);
-    loadingSign.run();
+    list.parentElement.insertBefore(loadingSign, list);
+
+    loadingSign.run().then();
 }
 
 
