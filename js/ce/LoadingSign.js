@@ -139,6 +139,8 @@ export class LoadingSign extends HTMLElement {
 
         this.oncallbackreject();
 
+        console.error(error);
+
         return this;
     }
     

@@ -6,7 +6,9 @@ import {qs, declade} from "./util.js";
 import {createNotice, vexdbGet, generateInstanceDetails, ResultObjectRecordCollector} from "./app-util.js";
 import {LoadingSign} from "./ce/LoadingSign.js";
 
-const teamNumber = qs("[name='team-number']").value;
+const teamNumberInput = qs("[name='team-number']");
+const teamNumber = teamNumberInput.value;
+teamNumberInput.remove();
 
 // Events, matches, award counts
 
@@ -49,6 +51,49 @@ const teamNumber = qs("[name='team-number']").value;
 
         return Promise.all(targertStatisticsPromises);
     };
+
+    // const targetStatisticCallbacks = [
+    //     async eventsBySku => {
+    //         return Object.keys(eventsBySku).length;
+    //     },
+
+    //     async () => {
+    //         return (await vexdbGet("matches", {team: teamNumber, nodata: true})).size;
+    //     },
+
+    //     async eventsBySku => {
+    //         const awards = (await vexdbGet("awards", {team: teamNumber})).result;
+            
+    //         let nLegitimateAwards = 0;
+    //         for (const resultObject of awards) {
+    //             const event = eventsBySku[resultObject.sku];
+    //             nLegitimateAwards += event && new Date() > new Date(event.end) ? 1 : 0;
+    //         }
+
+    //         return nLegitimateAwards;
+    //     },
+    // ];
+    
+    // const asyncCallback = () => {
+    //     const targertStatisticsPromises = [];
+        
+    //     for (let i = 0; i < targetStatisticCallbacks.length; i++) {
+    //         statList.setNumberAsLoading(i);
+
+    //         targertStatisticsPromises.push((async () => {
+    //             const count = await targetStatisticCallbacks[i](eventsBySku);
+    //             statList.setNumber(i, count);
+    //         })());
+    //     }
+
+    //     return Promise.all(targertStatisticsPromises);
+    // };
+
+    // const events = (await vexdbGet("events", {team: teamNumber, status: "past"})).result;
+    // const eventsBySku = {};
+    // for (const event of events) {
+    //     eventsBySku[event.sku] = event;
+    // }
 
     const loadingSign = LoadingSign.create(asyncCallback);
     statList.parentElement.insertBefore(loadingSign, statList);
