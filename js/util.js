@@ -19,6 +19,7 @@ export function createElement(tagNameOrConstructor="div", {
     attributes=[],
     children=[],
     parent=null,
+    listeners={},
     callback=null,
 }={}) {
     let element;
@@ -55,8 +56,14 @@ export function createElement(tagNameOrConstructor="div", {
         parent.appendChild(element);
     }
 
+    for (const [eventType, handlers] of Object.entries(listeners)) {
+        for (const [handler, options] of handlers) {
+            element.addEventListener(eventType, handler, options);
+        }
+    }
+
     if (callback) {
-        callback.call(this);
+        callback.call(element);
     }
 
     return element;

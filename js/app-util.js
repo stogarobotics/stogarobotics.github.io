@@ -417,6 +417,7 @@ export function scopeOf(resultObject) {
 
 export const scopeNames = [
     "World Championship",
+    "U.S. Open",
     "State Championship",
     "",
 ];

@@ -62,6 +62,8 @@ body {
     --team-member-icon-size-large: 72px;
     --team-member-icon-size-small: 56px;
 
+    --team-roster-n-columns: 2;
+
     --nav-gradient-start-offset: 20px;
     --nav-gradient-end-offset: calc(var(--header-height) * 7 / 8);
 
@@ -517,6 +519,10 @@ gallery-grid > gallery-item.notice {
     grid-row: span 2;
 }
 
+gallery-grid > gallery-item.empty {
+    opacity: .4;
+}
+
 paginator- {
     display: flex;
     align-items: center;
@@ -831,7 +837,7 @@ stat-list > big-number {
 
 team-roster {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: repeat(var(--team-roster-n-columns), auto);
 }
 
 team-member {
@@ -874,14 +880,11 @@ team-member > team-member-descriptor > h3 {
 team-member.large {
     grid-column: 1 / -1;
     grid-template-columns: var(--team-member-icon-size-large) auto;
+    margin-bottom: 1.5em;
 }
 
 team-member.large > team-member-image {
     height: var(--team-member-icon-size-large);
-}
-
-team-member.large + team-member:not(.large) {
-    margin-top: .5em;
 }
 
 team-member:not(.large) {
@@ -1474,10 +1477,20 @@ svg use.logo-gear-rotate {
 
     body {
         --nav-width: 160px;
+
+        --team-roster-n-columns: 1;
+    }
+    
+    body.homepage {
+        --header-logo-size: 205px;
     }
 
     main {
         font-size: 1em;
+    }
+
+    team-roster {
+        margin-right: 2em;
     }
 
     nav > nav-content > nav-grid-rack {
@@ -1501,6 +1514,8 @@ svg use.logo-gear-rotate {
         --gallery-image-min-width: 160px;
         --gallery-image-height: 120px;
         --gallery-n-columns: auto-fill;
+
+        --team-roster-n-columns: 2;
     }
     
     body.homepage {
@@ -1553,6 +1568,10 @@ svg use.logo-gear-rotate {
         grid-row: 2;
 
         padding-left: var(--nav-reservation);
+    }
+
+    team-roster {
+        margin-right: unset;
     }
 
     /* nav {
