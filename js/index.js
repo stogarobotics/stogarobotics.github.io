@@ -16,6 +16,11 @@ for (const element of qsa(".js-required")) {
     element.classList.remove("js-required");
 }
 
+// Remove all noscripts so they don't use up memory
+for (const element of qsa("noscript")) {
+    element.remove();
+}
+
 
 // let headerRect;
 // const headerMedia = qs("header-media");

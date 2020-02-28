@@ -119,6 +119,14 @@ async function fetchAndDisplayImages(options) {
             parent: galleryGrid,
         });
     }
+
+    while (galleryGrid.children.length < nResultsPerPage) {
+        createElement("gallery-item", {
+            classes: ["empty"],
+
+            parent: galleryGrid,
+        });
+    }
 }
 
 function addNotice(text) {
