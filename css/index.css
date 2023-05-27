@@ -67,10 +67,10 @@ body {
     --nav-gradient-start-offset: 20px;
     --nav-gradient-end-offset: calc(var(--header-height) * 7 / 8);
 
-   /* --nav-content-start-offset: calc(var(--header-height) / 2 - var(--nav-width) - 2 * var(--nav-link-margin)); */
+    /* --nav-content-start-offset: calc(var(--header-height) / 2 - var(--nav-width) - 2 * var(--nav-link-margin)); */
     --nav-content-start-offset: 0;
 
-    --nav-width: 200px;
+    --nav-width: 180px;
     --nav-margin: 4vw;
     --nav-size: calc(var(--nav-width) + var(--nav-margin));
     --nav-reservation-small: calc(var(--nav-width) + 2 * var(--nav-margin));
@@ -333,7 +333,7 @@ navigation-button,
 input[type="submit"] {
     padding: .2em .4em;
     
-    text-align: center; 
+    text-align: center;
     color: var(--color-garnet-3);
     background: linear-gradient(var(--color-bg-end), var(--color-bg-end)) no-repeat center,
             var(--bg-start);
@@ -532,7 +532,7 @@ paginator- {
 paginator- navigation-button {
     margin: 0 .3em;
     padding: 0 .3em;
-    font-size: 1em;
+    font-size: 1.25em;
 }
 
 paginator- navigation-button::before {
