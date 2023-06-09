@@ -30,13 +30,15 @@ import {LoadingSign} from "./ce/LoadingSign.js";
             const [eventsResponse, awardsResponse] = await Promise.all([
               robotEventsGetForTeam(teamNumber, "events"),
               robotEventsGetForTeam(teamNumber, "awards")
+             
             ]);
     
             const eventsData = eventsResponse[0];
             const awardsData = awardsResponse[0];
-    
+            console.log(eventsData)
             for (let innerIndex = 1; innerIndex <= eventsData.meta.last_page; innerIndex++) {
               const eventsPageResponse = await robotEventsGetForTeam(teamNumber, `events/?page=${innerIndex}`);
+      
               const nestedEventsData = eventsPageResponse[0];
     
               for (const event of nestedEventsData.data) {
@@ -47,16 +49,25 @@ import {LoadingSign} from "./ce/LoadingSign.js";
                 appearances += 1;
               }
             }
-    
-            for (const award of awardsData.data) {
-              const groomedName = groomAwardName(award.title);
-    
-              if (["Tournament Champions"].includes(groomedName)) {
-                nTournamentChamps += 1;
-              } else if (["Judges Award", "Build Award", "Amaze Award", "Robot Skills Champion", "Create Award", "Excellence Award", "Robot Skills 2nd Place"].includes(groomedName)) {
-                nAwards += 1;
+
+            for (let innerIndex = 1; innerIndex <= awardsData.meta.last_page; innerIndex++) {
+              const awardsPageResponse = await robotEventsGetForTeam(teamNumber, `awards/?page=${innerIndex}`);
+                
+              const nestedAwardsData = awardsPageResponse[0];
+              
+              for (const awards of nestedAwardsData.data) {
+                
+                const groomedName = groomAwardName(awards.title);
+                if (groomedName.includes(["Champion"])) {
+                  nTournamentChamps+= 1;
+                }
+                
+                  nAwards+=1;
+                
               }
             }
+    
+            
           })()
         );
       }
