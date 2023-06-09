@@ -3,7 +3,7 @@
  */
 
 import {declade, createElement} from "../util.js";
-import {createNotice, VexdbApiError} from "../app-util.js";
+import {createNotice, robotEventsApiError} from "../app-util.js";
 
 function instantiate(loadingSign, asyncCallback, oncallbackresolve=() => {}, oncallbackreject=() => {}, callbackRerun=() => {}) {
     loadingSign.resetElement();
@@ -119,9 +119,9 @@ export class LoadingSign extends HTMLElement {
         declade(this).appendChild(createNotice(`loading failed ${this.failMessage()}`));
 
         // For VexDB error code 0 (internal server error), show an additional message
-        if (error instanceof VexdbApiError && error.code === 0) {
+        if (error instanceof robotEventsApiError && error.code === 0) {
             createElement("p", {
-                textContent: "VexDB is currently unavailable. Try again later.",
+                textContent: "Robot Events is currently unavailable. Try again later.",
                 parent: this,
             });
         }

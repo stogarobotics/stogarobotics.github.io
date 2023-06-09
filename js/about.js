@@ -3,74 +3,84 @@
  */
 
 import {qs} from "./util.js";
-import {vexdbGet, vexdbGetForAllTeams, ResultObjectRecordCollector, scopeNames, groomAwardName} from "./app-util.js";
+import {robotEventsGet, robotEventsGetForAllTeams, robotEventsGetForTeam, ResultObjectRecordCollector, scopeNames, groomAwardName, teamNumbers} from "./app-util.js";
 import {LoadingSign} from "./ce/LoadingSign.js";
 
 {
-    const eventScopeCollector = ResultObjectRecordCollector.createCommon.eventsByScope();
-    const awardsCollector = ResultObjectRecordCollector.createCommon.awardsByType({
-        async willAccept(resultObject) {
-            const event = await findEvent(resultObject.sku);
-            return !event || new Date() > new Date(event.end);
-        },
-    });
-
+  
     const statList = qs("stat-list");
     
-    const asyncCallback = () => {
-        eventScopeCollector.clear();
-        awardsCollector.clear();
-
-        statList.parentElement.insertBefore(loadingSign, statList);
-
-        const promises = [];
-        
-        for (let i = 0; i < statList.numbers.length; i++) {
-            statList.setNumberAsLoading(i);
-        }
-
-        promises.push((async () => {
-            await eventScopeCollector.collectAsync(await vexdbGetForAllTeams("events", {status: "past"}));
-
-            // Number of Worlds appearances
-            statList.setNumber(0, eventScopeCollector.records.find(record => record.data.scope === scopeNames[0]).count);
-            // Total appearances
-            statList.setNumber(1, eventScopeCollector.nInstances);
-        })());
-        
-        promises.push((async () => {
-            await awardsCollector.collectAsync(await vexdbGetForAllTeams("awards"));
-
-            let nTournamentFinals = 0; // Counts both Champions and Finalists awards
-            let nDivisionFinalists = 0;
-
-            for (const record of awardsCollector.records) {
-                const name = groomAwardName(record.data.name);
-
-                if (["Tournament Champions", "Tournament Finalists"].includes(name)) {
-                    nTournamentFinals += record.count;
-                } else if (name === "Division Finalist") {
-                    nDivisionFinalists += record.count;
+    const asyncCallback = async () => {
+      
+    
+      statList.parentElement.insertBefore(loadingSign, statList);
+      for (let i = 0; i < statList.numbers.length; i++) {
+        statList.setNumberAsLoading(i);
+      }
+    
+      const promises = [];
+      let worldsAppearances = 0;
+      let appearances = 0;
+      let nTournamentChamps = 0;
+      let nAwards = 0;
+    
+      for (const teamNumber of teamNumbers) {
+        promises.push(
+          (async () => {
+            const [eventsResponse, awardsResponse] = await Promise.all([
+              robotEventsGetForTeam(teamNumber, "events"),
+              robotEventsGetForTeam(teamNumber, "awards")
+            ]);
+    
+            const eventsData = eventsResponse[0];
+            const awardsData = awardsResponse[0];
+    
+            for (let innerIndex = 1; innerIndex <= eventsData.meta.last_page; innerIndex++) {
+              const eventsPageResponse = await robotEventsGetForTeam(teamNumber, `events/?page=${innerIndex}`);
+              const nestedEventsData = eventsPageResponse[0];
+    
+              for (const event of nestedEventsData.data) {
+                const groomedName = groomAwardName(event.name);
+                if (groomedName.includes(scopeNames[0])) {
+                  worldsAppearances += 1;
                 }
+                appearances += 1;
+              }
             }
-
-            statList.setNumber(2, nTournamentFinals);
-            statList.setNumber(3, nDivisionFinalists);
-        })());
-
-        return Promise.all(promises);
+    
+            for (const award of awardsData.data) {
+              const groomedName = groomAwardName(award.title);
+    
+              if (["Tournament Champions"].includes(groomedName)) {
+                nTournamentChamps += 1;
+              } else if (["Judges Award", "Build Award", "Amaze Award", "Robot Skills Champion", "Create Award", "Excellence Award", "Robot Skills 2nd Place"].includes(groomedName)) {
+                nAwards += 1;
+              }
+            }
+          })()
+        );
+      }
+    
+      await Promise.all(promises);
+    
+      statList.setNumber(0, worldsAppearances);
+      statList.setNumber(1, appearances);
+      statList.setNumber(2, nTournamentChamps);
+      statList.setNumber(3, nAwards);
+    
     };
+    
 
     const loadingSign = LoadingSign.create(asyncCallback);
     loadingSign.run();
 
-    async function findEvent(sku) {
-        for (const instance of eventScopeCollector.instances()) {
-            if (instance.sku === sku) {
-                return instance;
-            }
-        }
+    // async function findEvent(id) {
+    //     for (const instance of eventScopeCollector.instances()) {
+    //         if (instance.id === id) {
+    //             return instance;
+    //         }
+    //     }
     
-        return (await vexdbGet("events", {sku})).result[0];
-    }
+    //     return (await robotEventsGet(`events/${id}`)).result[0];
+    // }
 }

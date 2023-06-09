@@ -1,9 +1,9 @@
 /**
- * @file Script that runs on the Achievements page. Queries data from the VexDB API and counts certain attributes to present team totals.
+ * @file Script that runs on the Achievements page. Queries data from the robotEvents API and counts certain attributes to present team totals.
  */
 
 import {qs, qsa, createElement, declade} from "./util.js";
-import {teamNumbers, vexdbGet, vexdbGetForTeams, createNotice, ResultObjectRecordCollector, groomAwardName, scopeNames, generateInstanceDetails} from "./app-util.js";
+import {teamNumbers, robotEventsGet, robotEventsGetForTeams, createNotice, ResultObjectRecordCollector, groomAwardName, scopeNames, generateInstanceDetails} from "./app-util.js";
 import {LoadingSign} from "./ce/LoadingSign.js";
 
 const instanceDisplay = qs("instance-display");
@@ -38,8 +38,8 @@ class RecordCollectorWrapper {
     }
 
     async count(teamNumbersTarget) {
-        // Query VexDB
-        const resultObjects = (await vexdbGetForTeams(this.endpointName, teamNumbersTarget, this.queryOptions, true)).flat();
+        // Query RobotEvents
+        const resultObjects = (await robotEventsGetForTeams(teamNumbersTarget, this.queryOptions, true)).flat();
     
         await this.collector.collectAsync(resultObjects);
     
@@ -164,7 +164,7 @@ const eventScopeWrapper = new RecordCollectorWrapper({
 const awardsWrapper = new RecordCollectorWrapper({
     collector: ResultObjectRecordCollector.createCommon.awardsByType({
         async willAccept(resultObject) {
-            // Only awards from past events or from those unknown to VexDB.
+            // Only awards from past events or from those unknown to RobotEvents.
             const event = await findEvent(resultObject.sku);
             return !event || new Date() > new Date(event.end);
         },
@@ -202,7 +202,7 @@ async function findEvent(sku) {
         }
     }
 
-    return (await vexdbGet("events", {sku})).result[0];
+    return (await robotEventsGet("events", {sku})).result[0];
 }
 
 

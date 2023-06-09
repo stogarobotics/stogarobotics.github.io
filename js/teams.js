@@ -3,7 +3,7 @@
  */
 
 import {qs, declade} from "./util.js";
-import {createNotice, vexdbGet, generateInstanceDetails, ResultObjectRecordCollector} from "./app-util.js";
+import {createNotice, robotEventsGet, robotEventsGetForTeam, generateInstanceDetails, ResultObjectRecordCollector, robotEventsGetForTeams} from "./app-util.js";
 import {LoadingSign} from "./ce/LoadingSign.js";
 
 const teamNumberInput = qs("[name='team-number']");
@@ -13,44 +13,76 @@ teamNumberInput.remove();
 // Events, matches, award counts
 
 {
+
     const statList = qs("stat-list");
 
     const targetStatisticCallbacks = [
-        async () => {
-            return (await vexdbGet("events", {team: teamNumber, nodata: true})).size;
-        },
-
-        async () => {
-            return (await vexdbGet("matches", {team: teamNumber, nodata: true})).size;
-        },
-
-        async () => {
-            const awards = (await vexdbGet("awards", {team: teamNumber})).result;
-            
-            let nLegitimateAwards = 0;
-            for (const resultObject of awards) {
-                const event = (await vexdbGet("events", {sku: resultObject.sku})).result[0];
-                nLegitimateAwards += Number(!event || new Date() > new Date(event.end));
-            }
-
-            return nLegitimateAwards;
-        },
+      async () => {
+        const eventsList = await robotEventsGetForTeam(`${teamNumber}`, "events");
+        const numOfPages = eventsList[0].meta.last_page;
+        let numOfEvents = 0;
+        let events = [];
+    
+        const eventsPromises = Array.from({ length: numOfPages }, async (_, i) => {
+          const event = (await robotEventsGetForTeam(`${teamNumber}`, `events?page=${i + 1}`)).flat();
+          events.push(event);
+        });
+    
+        await Promise.all(eventsPromises);
+    
+        const allEvents = events.flat();
+        numOfEvents = allEvents.reduce((count, event) => count + event.data.length, 0);
+    
+        return numOfEvents;
+      },
+      async () => {
+        const matchesList = await robotEventsGetForTeam(`${teamNumber}`, "matches");
+        const numOfPages = matchesList[0].meta.last_page;
+        let numOfMatches = 0;
+        let matches = [];
+    
+        const matchesPromises = Array.from({ length: numOfPages }, async (_, i) => {
+          const match = (await robotEventsGetForTeam(`${teamNumber}`, `matches?page=${i + 1}`)).flat();
+          matches.push(match);
+        });
+    
+        await Promise.all(matchesPromises);
+    
+        const allMatches = matches.flat();
+        numOfMatches = allMatches.reduce((count, match) => count + match.data.length, 0);
+    
+        return numOfMatches;
+      },
+      async () => {
+        const awardsList = await robotEventsGetForTeam(`${teamNumber}`, "awards");
+        const numOfPages = awardsList[0].meta.last_page;
+        let numOfAwards = 0;
+        let awards = [];
+    
+        const awardsPromises = Array.from({ length: numOfPages }, async (_, i) => {
+          const award = (await robotEventsGetForTeam(`${teamNumber}`, `awards?page=${i + 1}`)).flat();
+          awards.push(award);
+        });
+    
+        await Promise.all(awardsPromises);
+    
+        const allAwards = awards.flat();
+        numOfAwards = allAwards.reduce((count, award) => count + award.data.length, 0);
+    
+        return numOfAwards;
+      },
     ];
     
-    const asyncCallback = () => {
-        const targertStatisticsPromises = [];
-        
-        for (let i = 0; i < targetStatisticCallbacks.length; i++) {
-            statList.setNumberAsLoading(i);
-
-            targertStatisticsPromises.push((async () => {
-                const count = await targetStatisticCallbacks[i]();
-                statList.setNumber(i, count);
-            })());
-        }
-
-        return Promise.all(targertStatisticsPromises);
+    const asyncCallback = async () => {
+      const targetStatisticsPromises = targetStatisticCallbacks.map(async (callback, i) => {
+        statList.setNumberAsLoading(i);
+        const count = await callback();
+        statList.setNumber(i, count);
+      });
+    
+      await Promise.all(targetStatisticsPromises);
     };
+    
 
     // const targetStatisticCallbacks = [
     //     async eventsBySku => {
@@ -58,11 +90,11 @@ teamNumberInput.remove();
     //     },
 
     //     async () => {
-    //         return (await vexdbGet("matches", {team: teamNumber, nodata: true})).size;
+    //         return (await robotEventsGet("matches", {team: teamNumber, nodata: true})).size;
     //     },
 
     //     async eventsBySku => {
-    //         const awards = (await vexdbGet("awards", {team: teamNumber})).result;
+    //         const awards = (await robotEventsGet("awards", {team: teamNumber})).result;
             
     //         let nLegitimateAwards = 0;
     //         for (const resultObject of awards) {
@@ -89,7 +121,7 @@ teamNumberInput.remove();
     //     return Promise.all(targertStatisticsPromises);
     // };
 
-    // const events = (await vexdbGet("events", {team: teamNumber, status: "past"})).result;
+    // const events = (await robotEventsGet("events", {team: teamNumber, status: "past"})).result;
     // const eventsBySku = {};
     // for (const event of events) {
     //     eventsBySku[event.sku] = event;
@@ -117,50 +149,50 @@ teamNumberInput.remove();
 
 // Upcoming event list
 
-{
-    const list = qs("instance-list[name='upcoming-events']");
+// {
+//     const list = qs("instance-list[name='upcoming-events']");
     
-    const upcomingEventCollector = new ResultObjectRecordCollector({
-        willAccept(resultObject) {
-            // No past events
-            return new Date() < new Date(resultObject.end);
-        },
-    });
+//     const upcomingEventCollector = new ResultObjectRecordCollector({
+//         willAccept(resultObject) {
+//             // No past events
+//             return new Date() < new Date(resultObject.end);
+//         },
+//     });
 
-    const asyncCallback = async () => {
-        declade(list);
+//     const asyncCallback = async () => {
+//         declade(list);
 
-        list.parentElement.insertBefore(loadingSign, list);
+//         list.parentElement.insertBefore(loadingSign, list);
 
-        // VexDB's "status" parameter currently does not accept multiple values
-        upcomingEventCollector.collect((await vexdbGet("events", {team: teamNumber, status: "current"})).result);
-        upcomingEventCollector.collect((await vexdbGet("events", {team: teamNumber, status: "future"})).result);
-    };
+//         // RobotEvents's "status" parameter currently does not accept multiple values
+//         upcomingEventCollector.collect((await robotEventsGet("events", {team: teamNumber, status: "current"})).result);
+//         upcomingEventCollector.collect((await robotEventsGet("events", {team: teamNumber, status: "future"})).result);
+//     };
 
-    const oncallbackresolve = () => {
-        const instances = upcomingEventCollector.instances();
+//     const oncallbackresolve = () => {
+//         const instances = upcomingEventCollector.instances();
 
-        if (instances.length !== 0) {
-            // Show details for each found event
-            for (const instance of instances.sort((a, b) => new Date(a.start) - new Date(b.start))) {
-                list.appendChild(generateInstanceDetails.eventDetailed(instance));
-            }
-        } else {
-            // Show a notice that no events were found
-            list.parentElement.insertBefore(createNotice("no upcoming events found"), list);
-        }
-    };
+//         if (instances.length !== 0) {
+//             // Show details for each found event
+//             for (const instance of instances.sort((a, b) => new Date(a.start) - new Date(b.start))) {
+//                 list.appendChild(generateInstanceDetails.eventDetailed(instance));
+//             }
+//         } else {
+//             // Show a notice that no events were found
+//             list.parentElement.insertBefore(createNotice("no upcoming events found"), list);
+//         }
+//     };
 
-    const loadingSign = LoadingSign.create(asyncCallback, oncallbackresolve);
-    loadingSign.run();
-}
+//     const loadingSign = LoadingSign.create(asyncCallback, oncallbackresolve);
+//     loadingSign.run();
+// }
 
 
 /* (async () => {
 
      // W:L:T ratio
     {
-        const rankings = (await vexdbGet("rankings", {team: teamNumber})).result;
+        const rankings = (await RobotEventsGet("rankings", {team: teamNumber})).result;
         const rankingCounts = {
             wins: 0,
             losses: 0,
@@ -177,3 +209,4 @@ teamNumberInput.remove();
         buildStatisticBar(Object.values(rankingCounts).map(count => (count / max).toFixed(3)).join(":"), "win:loss:tie ratio");
     }
 })();*/
+
