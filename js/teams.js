@@ -19,57 +19,19 @@ teamNumberInput.remove();
     const targetStatisticCallbacks = [
       async () => {
         const eventsList = await robotEventsGetForTeam(`${teamNumber}`, "events");
-        const numOfPages = eventsList[0].meta.last_page;
-        let numOfEvents = 0;
-        let events = [];
-    
-        const eventsPromises = Array.from({ length: numOfPages }, async (_, i) => {
-          const event = (await robotEventsGetForTeam(`${teamNumber}`, `events?page=${i + 1}`)).flat();
-          events.push(event);
-        });
-    
-        await Promise.all(eventsPromises);
-    
-        const allEvents = events.flat();
-        numOfEvents = allEvents.reduce((count, event) => count + event.data.length, 0);
-    
+        const numOfEvents = eventsList[0].meta.total;
         return numOfEvents;
       },
       async () => {
-        const matchesList = await robotEventsGetForTeam(`${teamNumber}`, "matches");
-        const numOfPages = matchesList[0].meta.last_page;
-        let numOfMatches = 0;
-        let matches = [];
-    
-        const matchesPromises = Array.from({ length: numOfPages }, async (_, i) => {
-          const match = (await robotEventsGetForTeam(`${teamNumber}`, `matches?page=${i + 1}`)).flat();
-          matches.push(match);
-        });
-    
-        await Promise.all(matchesPromises);
-    
-        const allMatches = matches.flat();
-        numOfMatches = allMatches.reduce((count, match) => count + match.data.length, 0);
-    
+        const matchesList = await robotEventsGetForTeam(`${teamNumber}`, "matches"); 
+        const numOfMatches = matchesList[0].meta.total;
+        
         return numOfMatches;
       },
       async () => {
         const awardsList = await robotEventsGetForTeam(`${teamNumber}`, "awards");
-        const numOfPages = awardsList[0].meta.last_page;
-        let numOfAwards = 0;
-        let awards = [];
-    
-        const awardsPromises = Array.from({ length: numOfPages }, async (_, i) => {
-          const award = (await robotEventsGetForTeam(`${teamNumber}`, `awards?page=${i + 1}`)).flat();
-          awards.push(award);
-        });
-    
-        await Promise.all(awardsPromises);
-    
-        const allAwards = awards.flat();
-        numOfAwards = allAwards.reduce((count, award) => count + award.data.length, 0);
-    
-        return numOfAwards;
+        const numOfAwards = awardsList[0].meta.total;
+         return numOfAwards;
       },
     ];
     

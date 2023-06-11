@@ -25,18 +25,20 @@ const loadingNotice = instanceList.appendChild(createNotice("loading"));
     let awardsList;
     // If this fails, remove the awards preview entirely
     try {
-        awardsList = await robotEventsGetForAllTeams("awards",true);
+        awardsList = await robotEventsGetForAllTeams("awards?per_page=250",true);
         let list = [];
 
        for (let i =0; i< awardsList.length; i++) {
             list[i] = awardsList[i].meta.last_page
        }
        
-       for (let index = 0; index<awardsList.length; index++) {
-           let teamData = await robotEventsGetForTeam(teamNumbers[index],`awards?page=${list[index]}`);
-           
-            awardsList[index] = teamData[0];
-        }
+       const promises = awardsList.map(async (award, index) => {
+        const teamData = await robotEventsGetForTeam(teamNumbers[index], `awards?per_page=250&page=${list[index]}`);
+        awardsList[index] = teamData[0];
+      });
+      
+      // Execute all promises in parallel
+      await Promise.all(promises);
 
  } catch (error) {
         achievementsChunkOther.remove();

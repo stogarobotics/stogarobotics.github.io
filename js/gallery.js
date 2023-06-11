@@ -2,7 +2,7 @@
  * @file Script that runs on the gallery page. Controls querying and parsing of image info gathered from the API.
  */
 
-import {qs, qsa, declade, createElement, xhrGet} from "./util.js";
+import {qs, qsa, declade, createElement,getData} from "./util.js";
 
 const arrowLeftEnd = qs("paginator- navigation-button.arrow-left-end");
 const arrowLeft = qs("paginator- navigation-button.arrow-left");
@@ -49,7 +49,7 @@ const requestImages = (() => {
 
     return async options => {
         if (!queryResult) {
-            queryResult = JSON.parse(await xhrGet("./images.json"));
+            queryResult =await getData("./images.json");
         }
 
         const response = {
