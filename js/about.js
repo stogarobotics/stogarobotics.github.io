@@ -18,49 +18,93 @@ const asyncCallback = async () => {
   let appearances =0;
   let worldsAppearances =0;
   const teamPromises = teamNumbers.map(async (teamNumber) => {
+    
+   
+    
     const [eventsResponse, awardsResponse] = await Promise.all([
-      robotEventsGetForTeam(teamNumber, "events?per_page=250"),
-      robotEventsGetForTeam(teamNumber, "awards?per_page=250")
+      (async () => {
+        let eventsList;
+        if (localStorage.getItem(`eventsList${teamNumber}`) !== null) {
+          eventsList = JSON.parse(localStorage.getItem(`eventsList${teamNumber}`));
+        } else {
+          eventsList = await robotEventsGetForTeam(`${teamNumber}`, "events?per_page=250");
+          var eventsListString = JSON.stringify(eventsList);
+          localStorage.setItem(`eventsList${teamNumber}`, eventsListString);
+        }
+        return eventsList;
+      })(),
+    
+      (async () => {
+        let awardList;
+        if (localStorage.getItem(`awardList${teamNumber}`) !== null) {
+          awardList = JSON.parse(localStorage.getItem(`awardList${teamNumber}`));
+        } else {
+          awardList = await robotEventsGetForTeam(`${teamNumber}`, "awards?per_page=250");
+          var awardListString = JSON.stringify(awardList);
+          localStorage.setItem(`awardList${teamNumber}`, awardListString);
+        }
+        return awardList;
+      })()
     ]);
-
+    
     const eventsData = eventsResponse[0];
     const awardsData = awardsResponse[0];
-
+   
     const eventsPromises = [];
     const awardsPromises = [];
 
     for (let innerIndex = 1; innerIndex <= eventsData.meta.last_page; innerIndex++) {
       eventsPromises.push(
-        robotEventsGetForTeam(teamNumber, `events/?per_page=250&page=${innerIndex}`).then(([eventsPageResponse]) => {
-          for (const event of eventsPageResponse.data) {
-            const groomedName = groomAwardName(event.name);
-            if (groomedName.includes(scopeNames[0])) {
+        (async () => {
+          let event;
+          if (localStorage.getItem(`events?per_page=250${teamNumber}_${innerIndex}`) !== null) {
+            event= JSON.parse(localStorage.getItem(`events?per_page=250${teamNumber}_${innerIndex}`));
+          } else {
+            event = await robotEventsGetForTeam(`${teamNumber}`, `events?per_page=250&page=${innerIndex}`);
+            var eventListString = JSON.stringify(event);
+            localStorage.setItem(`events?per_page=250${teamNumber}_${innerIndex}`, eventListString);
+
+          }
+        
+          for (const ev of event[0].data) {
+            if (ev.name.includes(scopeNames[0])) {
               worldsAppearances += 1;
             }
-            appearances += 1;
+            appearances  += 1;
           }
-        })
+
+
+
+
+        })()
       );
     }
-
-
     for (let innerIndex = 1; innerIndex <= awardsData.meta.last_page; innerIndex++) {
       awardsPromises.push(
-        robotEventsGetForTeam(teamNumber, `awards/?per_page=250&page=${innerIndex}`).then(([awardsPageResponse]) => {
-            console.log(awardsPageResponse)
-          for (const awards of awardsPageResponse.data) {
-            const groomedName = groomAwardName(awards.title);
-            if (groomedName.includes(["Champion"])) {
+        (async () => {
+          let award;
+          if (localStorage.getItem(`awards?per_page=250${teamNumber}_${innerIndex}`) !== null) {
+            award= JSON.parse(localStorage.getItem(`awards?per_page=250${teamNumber}_${innerIndex}`));
+          } else {
+            award = await robotEventsGetForTeam(`${teamNumber}`, `awards?per_page=250&page=${innerIndex}`);
+            var awardListString = JSON.stringify(award);
+            localStorage.setItem(`awards?per_page=250${teamNumber}_${innerIndex}`, awardListString);
+
+          }
+         
+          for (const aw of award[0].data) {
+            if (aw.title.includes(['Champion'])) {
               nTournamentChamps += 1;
             }
             nAwards += 1;
           }
-        })
+        })()
       );
     }
 
     await Promise.all(eventsPromises.concat(awardsPromises));
   });
+
 
   await Promise.all(teamPromises);
 

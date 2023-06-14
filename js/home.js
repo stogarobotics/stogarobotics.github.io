@@ -21,20 +21,47 @@ const loadingNotice = instanceList.appendChild(createNotice("loading"));
     }
 
     // addEventListener("scroll", handleScroll, {once: true});
-
+   
     let awardsList;
+   
+
     // If this fails, remove the awards preview entirely
     try {
-        awardsList = await robotEventsGetForAllTeams("awards?per_page=250",true);
-        let list = [];
+       
+        if (localStorage.getItem(`awardsList`) == null  ) {
+            awardsList = await robotEventsGetForAllTeams("awards?per_page=250",true);
+            const awardsListString = JSON.stringify(awardsList);
+            localStorage.setItem('awardsList', awardsListString);
+    
+            
+         } else {
+            awardsList = JSON.parse(localStorage.getItem(`awardsList`));
+            console.log(awardsList)
+            
+           }
+        
+        
 
+        
+        let list = [];
+           console.log(awardsList)
        for (let i =0; i< awardsList.length; i++) {
             list[i] = awardsList[i].meta.last_page
+           
        }
        
        const promises = awardsList.map(async (award, index) => {
-        const teamData = await robotEventsGetForTeam(teamNumbers[index], `awards?per_page=250&page=${list[index]}`);
-        awardsList[index] = teamData[0];
+        
+        
+          if (localStorage.getItem(`awards?per_page=250${teamNumbers[index]}_${index}`) !== null) {
+            award= JSON.parse(localStorage.getItem(`awards?per_page=250${teamNumbers[index]}_${index}`));
+          } else {
+            award = await robotEventsGetForTeam(`${teamNumbers[index]}`, `awards?per_page=250&page=${index}`);
+            var awardListString = JSON.stringify(award);
+            localStorage.setItem(`awards?per_page=250${teamNumbers[index]}_${index}`, awardListString);
+
+          } 
+        
       });
       
       // Execute all promises in parallel
@@ -46,17 +73,25 @@ const loadingNotice = instanceList.appendChild(createNotice("loading"));
         throw error;
     }
 
-    console.log(awardsList);
-
     // Get the event result object from each award and extract relevant data
-  
+    
     const awardsPromises = awardsList.map(async award => {
+    
         
         const eventFromAward = award["data"][award.data.length-1].event;
         const eventID = eventFromAward.id;
-        const event = await robotEventsGet(`events/${eventID}`);
         
-      
+        let event;
+        if (localStorage.getItem(`events/${eventID}`) !== null ) {
+            event= JSON.parse(localStorage.getItem(`events/${eventID}`));
+          } else {
+            event = await robotEventsGet(`events/${eventID}`);
+            console.log(event.name)
+            var awardListString = JSON.stringify(event);
+            localStorage.setItem(`events/${eventID}`, awardListString);
+
+          } 
+        
         return {
             award,
             event,
@@ -105,7 +140,7 @@ const loadingNotice = instanceList.appendChild(createNotice("loading"));
 
     for (let i = 0; i < Math.min(nMaxAwardsToShow, awards.length); i++) {
         const award= awards[i].award.data[awards[i].award.data.length-1];
-        console.log(award.title);
+        
         
         const instanceDetails = instanceList.appendChild(generateInstanceDetails.award(award, undefined, awards[i].event));
         instanceDetails.appendChild(createElement("div", {

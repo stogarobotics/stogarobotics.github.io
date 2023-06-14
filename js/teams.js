@@ -5,9 +5,10 @@
 import {qs, declade} from "./util.js";
 import {createNotice, robotEventsGet, robotEventsGetForTeam, generateInstanceDetails, ResultObjectRecordCollector, robotEventsGetForTeams} from "./app-util.js";
 import {LoadingSign} from "./ce/LoadingSign.js";
-
+const seasonIDs= [181,173,154,139,130,125,119,115,110,102]
 const teamNumberInput = qs("[name='team-number']");
 const teamNumber = teamNumberInput.value;
+
 teamNumberInput.remove();
 
 // Events, matches, award counts
@@ -18,20 +19,73 @@ teamNumberInput.remove();
 
     const targetStatisticCallbacks = [
       async () => {
-        const eventsList = await robotEventsGetForTeam(`${teamNumber}`, "events");
+        let eventsList;
+        if (localStorage.getItem(`eventsList${teamNumber}`) !== null) {
+         eventsList = JSON.parse(localStorage.getItem(`eventsList${teamNumber}`));
+         
+        
+       
+        } else {
+          
+         eventsList = await robotEventsGetForTeam(`${teamNumber}`, "events?per_page=250");
+          var eventsListString = JSON.stringify(eventsList);
+          localStorage.setItem(`eventsList${teamNumber}`, eventsListString);
+          
+        }
         const numOfEvents = eventsList[0].meta.total;
         return numOfEvents;
-      },
-      async () => {
-        const matchesList = await robotEventsGetForTeam(`${teamNumber}`, "matches"); 
-        const numOfMatches = matchesList[0].meta.total;
         
-        return numOfMatches;
+        
+        
       },
       async () => {
-        const awardsList = await robotEventsGetForTeam(`${teamNumber}`, "awards");
-        const numOfAwards = awardsList[0].meta.total;
-         return numOfAwards;
+        let matchList;
+        if (localStorage.getItem(`matchList${teamNumber}`) !== null) {
+         matchList = JSON.parse(localStorage.getItem(`matchList${teamNumber}`));
+        
+         
+       
+       
+        } else {
+        
+          const seasons =  await robotEventsGet("seasons?per_page=250&team[]=60031&team[]=60032&team[]=78265&team[]=108654&team[]=117453&team[]=117544");
+          
+          let url = '';
+          for (let i =0; i < seasons.data.length; i++) {
+            url += `&season[]=${seasons.data[i].id}`
+          }
+          console.log(url)
+         matchList = await robotEventsGetForTeam(`${teamNumber}`, "matches?per_page=250"+url);
+         console.log(matchList)
+          var matchListString = JSON.stringify(matchList);
+          localStorage.setItem(`matchList${teamNumber}`, matchListString);
+          
+        }
+        const numOfMatches = matchList[0].meta.total;
+        return numOfMatches;
+        
+        
+        
+      },
+      async () => {
+        let awardList;
+        if (localStorage.getItem(`awardList${teamNumber}`) !== null) {
+         awardList = JSON.parse(localStorage.getItem(`awardList${teamNumber}`));
+         
+       
+       
+        } else {
+          
+         awardList = await robotEventsGetForTeam(`${teamNumber}`, "awards?per_page=250");
+          var awardListString = JSON.stringify(awardList);
+          localStorage.setItem(`awardList${teamNumber}`, awardListString);
+          
+        }
+        const numOfAwards = awardList[0].meta.total;
+        return numOfAwards;
+        
+        
+        
       },
     ];
     

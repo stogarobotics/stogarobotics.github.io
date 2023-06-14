@@ -120,7 +120,7 @@ export function relcoords(mouseEvent, target, method=0) {
     return {x, y};
 }
 
-export async function getData(url = "") {
+export async function getData(url = "", ) {
     // Default options are marked with *
     const response = await fetch(url, {
       method: "GET", // *GET, POST, PUT, DELETE, etc.
